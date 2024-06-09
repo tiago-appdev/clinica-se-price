@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useEffect, useState } from "react";
+import { supabase } from '../../supabase';
 import {
 	Dialog,
 	DialogContent,
@@ -17,31 +18,31 @@ import "react-datepicker/dist/react-datepicker.css";
 export default function Home() {
 	const [isModalOpen, setIsModalOpen] = useState(false);
 	const [id, setId] = useState("");
-	const [professionals, setProfessionals] = useState([]);
+	const [professionals, setProfessionals] = useState<any[]>([]);
 	const [professional, setProfessional] = useState("");
 	const [appointmentType, setAppointmentType] = useState("");
 	const [date, setDate] = useState(new Date());
 	const [time, setTime] = useState("08:30"); // Initial time value);
 
 	// Function to fetch professionals from Supabase
-	// const fetchProfessionals = async () => {
-	// 	try {
-	// 		const { data, error } = await supabase
-	// 			.from("professionals")
-	// 			.select("*");
-	// 		if (error) {
-	// 			throw error;
-	// 		}
-	// 		setProfessionals(data);
-	// 	} catch (error) {
-	// 		console.error("Error fetching professionals:", error.message);
-	// 	}
-	// };
+	const fetchProfessionals = async () => {
+		try {
+			const { data, error } = await supabase
+				.from("doctors")
+				.select("*");
+			if (error) {
+				throw error;
+			}
+			setProfessionals(data);
+		} catch (error) {
+			console.error("Error fetching professionals:", error.message);
+		}
+	};
 
 	// Fetch professionals on component mount
-	// useEffect(() => {
-	// 	fetchProfessionals();
-	// }, []);
+	useEffect(() => {
+		fetchProfessionals();
+	}, []);
 
 	const handleModalOpen = () => {
 		setIsModalOpen(true);
@@ -57,10 +58,29 @@ export default function Home() {
 		e.preventDefault();
 		console.log("ID:", id);
 		console.log("Professional:", professional);
+		console.log("Appointment Type:", appointmentType);
 		console.log("Date:", date);
 		console.log("Time:", time);
+        saveAppointment();
 		handleModalClose();
 	};
+
+    const saveAppointment = async () => {
+        const { data, error } = await supabase
+            .from('appointments')
+            .insert([
+                {
+                    patient_id: id,
+                    doctor_id: professional,
+                    appointment_type: appointmentType,
+                    appointment_date: date,
+                    appointment_time: time,
+                },
+            ]);
+        if (error) {
+            console.error('Error saving appointment:', error.message);
+        }
+    }
 
 	// Function to handle date change
 	const handleDateChange = (date: React.SetStateAction<Date>) => {
@@ -222,7 +242,7 @@ export default function Home() {
 								htmlFor="professional"
 								className="text-right"
 							>
-								Seleccione un profesional
+								Profesional
 							</Label>
 							<select
 								id="professional"
@@ -236,10 +256,9 @@ export default function Home() {
 									Seleccione un profesional
 								</option>
 								{professionals.map((prof) => (
-									// <option key={prof.id} value={prof.id}>
-									// 	{prof.name}
-									// </option>
-									<option>Juan Gonzalez</option>
+									<option key={prof.doctor_id} value={prof.doctor_id}>
+										{prof.first_name}
+									</option>
 								))}
 							</select>
 						</div>
@@ -258,8 +277,8 @@ export default function Home() {
 								}
 								className="col-span-3 block w-full px-3 py-2 border rounded-md text-sm text-gray-700 focus:ring-1 focus:ring-primary focus:border-primary"
 							>
-								<option>Atención Medica</option>
-								<option>Análisis Clínicos</option>
+								<option value="Atención Medica">Atención Medica</option>
+								<option value="Análisis Clínicos">Análisis Clínicos</option>
 							</select>
 						</div>
 						<div className="grid items-center grid-cols-4 gap-4">
