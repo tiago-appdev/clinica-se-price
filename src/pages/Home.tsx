@@ -58,10 +58,29 @@ export default function Home() {
 		e.preventDefault();
 		console.log("ID:", id);
 		console.log("Professional:", professional);
+		console.log("Appointment Type:", appointmentType);
 		console.log("Date:", date);
 		console.log("Time:", time);
+        saveAppointment();
 		handleModalClose();
 	};
+
+    const saveAppointment = async () => {
+        const { data, error } = await supabase
+            .from('appointments')
+            .insert([
+                {
+                    patient_id: id,
+                    doctor_id: professional,
+                    appointment_type: appointmentType,
+                    appointment_date: date,
+                    appointment_time: time,
+                },
+            ]);
+        if (error) {
+            console.error('Error saving appointment:', error.message);
+        }
+    }
 
 	// Function to handle date change
 	const handleDateChange = (date: React.SetStateAction<Date>) => {
@@ -223,7 +242,7 @@ export default function Home() {
 								htmlFor="professional"
 								className="text-right"
 							>
-								Seleccione un profesional
+								Profesional
 							</Label>
 							<select
 								id="professional"
@@ -258,8 +277,8 @@ export default function Home() {
 								}
 								className="col-span-3 block w-full px-3 py-2 border rounded-md text-sm text-gray-700 focus:ring-1 focus:ring-primary focus:border-primary"
 							>
-								<option>Atención Medica</option>
-								<option>Análisis Clínicos</option>
+								<option value="Atención Medica">Atención Medica</option>
+								<option value="Análisis Clínicos">Análisis Clínicos</option>
 							</select>
 						</div>
 						<div className="grid items-center grid-cols-4 gap-4">
