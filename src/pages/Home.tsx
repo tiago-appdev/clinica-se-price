@@ -19,9 +19,9 @@ export default function Home() {
 	const [id, setId] = useState("");
 	const [professionals, setProfessionals] = useState([]);
 	const [professional, setProfessional] = useState("");
-	const [selectedDate, setSelectedDate] = useState(new Date());
-	const [selectedTime, setSelectedTime] = useState("08:30"); // Initial time value
-	const [datetime, setDatetime] = useState("");
+	const [appointmentType, setAppointmentType] = useState("");
+	const [date, setDate] = useState(new Date());
+	const [time, setTime] = useState("08:30"); // Initial time value);
 
 	// Function to fetch professionals from Supabase
 	// const fetchProfessionals = async () => {
@@ -50,24 +50,26 @@ export default function Home() {
 		setIsModalOpen(false);
 		setId("");
 		setProfessional("");
-		setDatetime("");
+		setDate(new Date())
+		setTime("08:30");
 	};
 	const handleSubmit = (e) => {
 		e.preventDefault();
 		console.log("ID:", id);
 		console.log("Professional:", professional);
-		console.log("Datetime:", datetime);
+		console.log("Date:", date);
+		console.log("Time:", time);
 		handleModalClose();
 	};
 
 	// Function to handle date change
-	const handleDateChange = (date) => {
-		setSelectedDate(date);
+	const handleDateChange = (date: React.SetStateAction<Date>) => {
+		setDate(date);
 	};
 
 	// Function to handle time change
-	const handleTimeChange = (e) => {
-		setSelectedTime(e.target.value);
+	const handleTimeChange = (e: { target: { value: React.SetStateAction<string>; }; }) => {
+		setTime(e.target.value);
 	};
 
 	return (
@@ -220,7 +222,7 @@ export default function Home() {
 								htmlFor="professional"
 								className="text-right"
 							>
-								Seleccioná el Profesional
+								Seleccione un profesional
 							</Label>
 							<select
 								id="professional"
@@ -241,13 +243,32 @@ export default function Home() {
 								))}
 							</select>
 						</div>
+                        <div className="grid items-center grid-cols-4 gap-4">
+							<Label
+								htmlFor="appointmentType"
+								className="text-right"
+							>
+								Tipo de Turno
+							</Label>
+							<select
+								id="appointmentType"
+								value={appointmentType}
+								onChange={(e) =>
+									setAppointmentType(e.target.value)
+								}
+								className="col-span-3 block w-full px-3 py-2 border rounded-md text-sm text-gray-700 focus:ring-1 focus:ring-primary focus:border-primary"
+							>
+								<option>Atención Medica</option>
+								<option>Análisis Clínicos</option>
+							</select>
+						</div>
 						<div className="grid items-center grid-cols-4 gap-4">
 							<Label htmlFor="date" className="text-right">
 								Fecha
 							</Label>
 							<DatePicker
 								id="date"
-								selected={selectedDate}
+								selected={date}
 								onChange={handleDateChange}
 								dateFormat="dd/MM/yyyy"
 								className="col-span-3 px-3 py-2 border rounded-md text-sm text-gray-700 focus:ring-1 focus:ring-primary focus:border-primary"
@@ -260,7 +281,7 @@ export default function Home() {
 							<div>
 								<select
 									id="time"
-									value={selectedTime}
+									value={time}
 									onChange={handleTimeChange}
 									className="col-span-3 px-3 py-2 border rounded-md text-sm text-gray-700 focus:ring-1 focus:ring-primary focus:border-primary"
 								>
