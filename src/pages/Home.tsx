@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useEffect, useState } from "react";
+import { supabase } from '../../supabase';
 import {
 	Dialog,
 	DialogContent,
@@ -17,31 +18,31 @@ import "react-datepicker/dist/react-datepicker.css";
 export default function Home() {
 	const [isModalOpen, setIsModalOpen] = useState(false);
 	const [id, setId] = useState("");
-	const [professionals, setProfessionals] = useState([]);
+	const [professionals, setProfessionals] = useState<any[]>([]);
 	const [professional, setProfessional] = useState("");
 	const [appointmentType, setAppointmentType] = useState("");
 	const [date, setDate] = useState(new Date());
 	const [time, setTime] = useState("08:30"); // Initial time value);
 
 	// Function to fetch professionals from Supabase
-	// const fetchProfessionals = async () => {
-	// 	try {
-	// 		const { data, error } = await supabase
-	// 			.from("professionals")
-	// 			.select("*");
-	// 		if (error) {
-	// 			throw error;
-	// 		}
-	// 		setProfessionals(data);
-	// 	} catch (error) {
-	// 		console.error("Error fetching professionals:", error.message);
-	// 	}
-	// };
+	const fetchProfessionals = async () => {
+		try {
+			const { data, error } = await supabase
+				.from("doctors")
+				.select("*");
+			if (error) {
+				throw error;
+			}
+			setProfessionals(data);
+		} catch (error) {
+			console.error("Error fetching professionals:", error.message);
+		}
+	};
 
 	// Fetch professionals on component mount
-	// useEffect(() => {
-	// 	fetchProfessionals();
-	// }, []);
+	useEffect(() => {
+		fetchProfessionals();
+	}, []);
 
 	const handleModalOpen = () => {
 		setIsModalOpen(true);
@@ -236,10 +237,9 @@ export default function Home() {
 									Seleccione un profesional
 								</option>
 								{professionals.map((prof) => (
-									// <option key={prof.id} value={prof.id}>
-									// 	{prof.name}
-									// </option>
-									<option>Juan Gonzalez</option>
+									<option key={prof.doctor_id} value={prof.doctor_id}>
+										{prof.first_name}
+									</option>
 								))}
 							</select>
 						</div>
