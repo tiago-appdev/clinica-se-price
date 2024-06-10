@@ -66,7 +66,7 @@ export default function Home() {
 	};
 
 	// Update available times based on booked times
-	const updateAvailableTimes = (bookedTimes) => {
+	const updateAvailableTimes = (bookedTimes: string | any[]) => {
 		const allTimes = generateTimeOptions();
 		const filteredTimes = allTimes.filter(
 			(time) => !bookedTimes.includes(time+":00")
@@ -140,7 +140,7 @@ export default function Home() {
 			<header className="bg-gray-900 text-white px-4 lg:px-6 h-14 flex items-center">
 				<a href="#" className="flex items-center justify-center">
 					<CrossIcon className="h-6 w-6" />
-					<span className="font-bold text-lg">Clinica SePrice</span>
+					<span className="font-bold text-lg p-1">Clinica SePrice</span>
 				</a>
 				<nav className="ml-auto flex gap-4 sm:gap-6">
 					<a
@@ -161,6 +161,7 @@ export default function Home() {
 				<section className="flex items-center justify-center w-full py-12 md:py-24 lg:py-32">
 					<div className="container px-4 md:px-6 space-y-8">
 						<div className="grid max-w-[800px] mx-auto gap-4 text-center">
+                            {/* <CrossIcon className="h-20 w-20 inline-flex items-center justify-center" /> */}
 							<h1 className="text-3xl font-bold tracking-tighter sm:text-4xl md:text-5xl">
 								Bienvenido a Clinica SePrice
 							</h1>
@@ -203,10 +204,10 @@ export default function Home() {
 							<div className="flex flex-col items-center justify-center space-y-2 p-4">
 								<MicroscopeIcon className="h-8 w-8" />
 								<h3 className="text-lg font-semibold">
-									Diagnósticos
+									Laboratorios
 								</h3>
 								<p className="text-gray-500 text-center dark:text-gray-400">
-									Servicios de diagnóstico avanzados para
+									Servicios de laboratorio avanzados para
 									identificar y abordar sus inquietudes de
 									salud.
 								</p>
@@ -420,7 +421,7 @@ function HeartPulseIcon(props) {
 			height="24"
 			viewBox="0 0 24 24"
 			fill="none"
-			stroke="currentColor"
+			stroke="red"
 			strokeWidth="2"
 			strokeLinecap="round"
 			strokeLinejoin="round"
@@ -440,7 +441,7 @@ function MicroscopeIcon(props) {
 			height="24"
 			viewBox="0 0 24 24"
 			fill="none"
-			stroke="currentColor"
+			stroke="blue"
 			strokeWidth="2"
 			strokeLinecap="round"
 			strokeLinejoin="round"
@@ -464,7 +465,7 @@ function StethoscopeIcon(props) {
 			height="24"
 			viewBox="0 0 24 24"
 			fill="none"
-			stroke="currentColor"
+			stroke="pink"
 			strokeWidth="2"
 			strokeLinecap="round"
 			strokeLinejoin="round"
