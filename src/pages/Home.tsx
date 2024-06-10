@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useEffect, useState } from "react";
-import { supabase } from '../../supabase';
+import { supabase } from "../../supabase";
 import {
 	Dialog,
 	DialogContent,
@@ -20,16 +20,17 @@ export default function Home() {
 	const [id, setId] = useState("");
 	const [professionals, setProfessionals] = useState<any[]>([]);
 	const [professional, setProfessional] = useState("");
-	const [appointmentType, setAppointmentType] = useState("");
+	const [appointmentType, setAppointmentType] = useState("Atención Medica");
 	const [date, setDate] = useState(new Date());
-	const [time, setTime] = useState("08:30"); // Initial time value);
+	const [time, setTime] = useState("08:00");
+	const [availableTimes, setAvailableTimes] = useState<string[]>(
+		generateTimeOptions()
+	);
 
 	// Function to fetch professionals from Supabase
 	const fetchProfessionals = async () => {
 		try {
-			const { data, error } = await supabase
-				.from("doctors")
-				.select("*");
+			const { data, error } = await supabase.from("doctors").select("*");
 			if (error) {
 				throw error;
 			}
@@ -44,6 +45,42 @@ export default function Home() {
 		fetchProfessionals();
 	}, []);
 
+	// Fetch appointments for the selected professional and date
+	const fetchAppointments = async () => {
+		try {
+			const { data, error } = await supabase
+				.from("appointments")
+				.select("appointment_time")
+				.eq("appointment_doctor_id", professional)
+				.eq("appointment_date", date.toISOString().split("T")[0]);
+			if (error) {
+				throw error;
+			}
+			const bookedTimes = data.map(
+				(appointment) => appointment.appointment_time
+			);
+			updateAvailableTimes(bookedTimes);
+		} catch (error) {
+			console.error("Error fetching appointments:", error.message);
+		}
+	};
+
+	// Update available times based on booked times
+	const updateAvailableTimes = (bookedTimes) => {
+		const allTimes = generateTimeOptions();
+		const filteredTimes = allTimes.filter(
+			(time) => !bookedTimes.includes(time+":00")
+		);
+		setAvailableTimes(filteredTimes);
+	};
+
+	// Fetch appointments when professional or date changes
+	useEffect(() => {
+		if (professional && date) {
+			fetchAppointments();
+		}
+	}, [professional, date]);
+
 	const handleModalOpen = () => {
 		setIsModalOpen(true);
 	};
@@ -51,8 +88,8 @@ export default function Home() {
 		setIsModalOpen(false);
 		setId("");
 		setProfessional("");
-		setDate(new Date())
-		setTime("08:30");
+		setDate(new Date());
+		setTime("08:00");
 	};
 	const handleSubmit = (e) => {
 		e.preventDefault();
@@ -61,26 +98,30 @@ export default function Home() {
 		console.log("Appointment Type:", appointmentType);
 		console.log("Date:", date);
 		console.log("Time:", time);
-        saveAppointment();
+		saveAppointment();
 		handleModalClose();
 	};
 
-    const saveAppointment = async () => {
-        const { data, error } = await supabase
-            .from('appointments')
-            .insert([
-                {
-                    patient_id: id,
-                    doctor_id: professional,
-                    appointment_type: appointmentType,
-                    appointment_date: date,
-                    appointment_time: time,
-                },
-            ]);
-        if (error) {
-            console.error('Error saving appointment:', error.message);
-        }
-    }
+	const saveAppointment = async () => {
+		const { data, error } = await supabase.from("appointments").insert([
+			{
+				appointment_patient_id: id,
+				appointment_doctor_id: professional,
+				appointment_type: appointmentType,
+				appointment_date: date,
+				appointment_time: time,
+			},
+		]);
+		if (error) {
+			console.error("Error saving appointment:", error.message);
+		}
+	};
+
+	const handleProfessionalChange = (e: {
+		target: { value: React.SetStateAction<string> };
+	}) => {
+		setProfessional(e.target.value);
+	};
 
 	// Function to handle date change
 	const handleDateChange = (date: React.SetStateAction<Date>) => {
@@ -88,7 +129,9 @@ export default function Home() {
 	};
 
 	// Function to handle time change
-	const handleTimeChange = (e: { target: { value: React.SetStateAction<string>; }; }) => {
+	const handleTimeChange = (e: {
+		target: { value: React.SetStateAction<string> };
+	}) => {
 		setTime(e.target.value);
 	};
 
@@ -234,6 +277,9 @@ export default function Home() {
 								id="id"
 								value={id}
 								onChange={(e) => setId(e.target.value)}
+								type="text"
+								placeholder="Ingrese su DNI. Sin puntos."
+								required
 								className="col-span-3"
 							/>
 						</div>
@@ -247,22 +293,24 @@ export default function Home() {
 							<select
 								id="professional"
 								value={professional}
-								onChange={(e) =>
-									setProfessional(e.target.value)
-								}
+								onChange={handleProfessionalChange}
+								required
 								className="col-span-3 block w-full px-3 py-2 border rounded-md text-sm text-gray-700 focus:ring-1 focus:ring-primary focus:border-primary"
 							>
 								<option value="">
 									Seleccione un profesional
 								</option>
 								{professionals.map((prof) => (
-									<option key={prof.doctor_id} value={prof.doctor_id}>
-										{prof.first_name}
+									<option
+										key={prof.doctor_id}
+										value={prof.doctor_id}
+									>
+										{prof.doctor_first_name}
 									</option>
 								))}
 							</select>
 						</div>
-                        <div className="grid items-center grid-cols-4 gap-4">
+						<div className="grid items-center grid-cols-4 gap-4">
 							<Label
 								htmlFor="appointmentType"
 								className="text-right"
@@ -275,10 +323,15 @@ export default function Home() {
 								onChange={(e) =>
 									setAppointmentType(e.target.value)
 								}
+                                required
 								className="col-span-3 block w-full px-3 py-2 border rounded-md text-sm text-gray-700 focus:ring-1 focus:ring-primary focus:border-primary"
 							>
-								<option value="Atención Medica">Atención Medica</option>
-								<option value="Análisis Clínicos">Análisis Clínicos</option>
+								<option value="Atención Medica">
+									Atención Medica
+								</option>
+								<option value="Análisis Clínicos">
+									Análisis Clínicos
+								</option>
 							</select>
 						</div>
 						<div className="grid items-center grid-cols-4 gap-4">
@@ -290,6 +343,7 @@ export default function Home() {
 								selected={date}
 								onChange={handleDateChange}
 								dateFormat="dd/MM/yyyy"
+                                required
 								className="col-span-3 px-3 py-2 border rounded-md text-sm text-gray-700 focus:ring-1 focus:ring-primary focus:border-primary"
 							/>
 						</div>
@@ -302,10 +356,17 @@ export default function Home() {
 									id="time"
 									value={time}
 									onChange={handleTimeChange}
+                                    required
 									className="col-span-3 px-3 py-2 border rounded-md text-sm text-gray-700 focus:ring-1 focus:ring-primary focus:border-primary"
 								>
-									{/* Generate options for time */}
-									{generateTimeOptions()}
+									{availableTimes.map((timeOption) => (
+										<option
+											key={timeOption}
+											value={timeOption}
+										>
+											{timeOption}
+										</option>
+									))}
 								</select>
 							</div>
 						</div>
@@ -416,32 +477,13 @@ function StethoscopeIcon(props) {
 }
 
 // Function to generate time options
-const generateTimeOptions = (): JSX.Element[] => {
-	const startTime = new Date();
-	startTime.setHours(8, 30, 0); // Start time: 08:30
-	const endTime = new Date();
-	endTime.setHours(12, 20, 0); // End time: 12:20
-
-	const timeOptions: JSX.Element[] = [];
-	let currentTime = new Date(startTime);
-
-	// Loop to generate options every 10 minutes
-	while (currentTime <= endTime) {
-		const optionValue = `${currentTime
-			.getHours()
-			.toString()
-			.padStart(2, "0")}:${currentTime
-			.getMinutes()
-			.toString()
-			.padStart(2, "0")}`;
-		const optionLabel = `${optionValue}`;
-		timeOptions.push(
-			<option key={optionValue} value={optionValue}>
-				{optionLabel}
-			</option>
-		);
-		currentTime.setMinutes(currentTime.getMinutes() + 10);
-	}
-
-	return timeOptions;
-};
+function generateTimeOptions() {
+    const times: string[] = [];
+    for (let hour = 8; hour < 19; hour++) {
+        for (let minutes = 0; minutes < 60; minutes += 30) {
+            const time = `${hour.toString().padStart(2, "0")}:${minutes.toString().padStart(2, "0")}`;
+            times.push(time);
+        }
+    }
+    return times;
+}
