@@ -8,7 +8,7 @@ const Button = ({
 	...props
 }) => {
 	const baseStyles =
-		"inline-flex h-10 items-center justify-center rounded-md text-sm font-medium shadow transition-colors focus-visible:outline-none focus-visible:ring-1";
+		"inline-flex h-10 items-center justify-right rounded-md text-sm font-medium shadow transition-colors focus-visible:outline-none focus-visible:ring-1";
 	const variantStyles =
 		variant === "primary"
 			? "bg-primary text-white hover:bg-primary/90 focus-visible:ring-primary"
