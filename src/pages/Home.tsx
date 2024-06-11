@@ -6,14 +6,15 @@ import {
 	Dialog,
 	DialogContent,
 	DialogHeader,
+	DialogFooter,
 	DialogTitle,
 	DialogDescription,
-	DialogFooter,
 } from "../components/Dialog";
 import Input from "../components/Input";
 import Label from "../components/Label";
 import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
+import Button from "../components/Button";
 
 export default function Home() {
 	const [isModalOpen, setIsModalOpen] = useState(false);
@@ -26,6 +27,9 @@ export default function Home() {
 	const [availableTimes, setAvailableTimes] = useState<string[]>(
 		generateTimeOptions()
 	);
+	const [isLoginModalOpen, setIsLoginModalOpen] = useState(false);
+	const [username, setUsername] = useState("");
+	const [password, setPassword] = useState("");
 	const [activeTab, setActiveTab] = useState("reservar");
 
 	interface Appointment {
@@ -59,7 +63,7 @@ export default function Home() {
 		fetchProfessionals();
 	}, []);
 
-	// Fetch appointments for the selected professional and date
+	// Fetch appointments for the selected professional and date to get booked times
 	const fetchDoctorAppointments = async () => {
 		try {
 			const { data, error } = await supabase
@@ -81,6 +85,17 @@ export default function Home() {
 	// Fetch appointments for the selected patient
 	const fetchPatientAppointments = async () => {
 		try {
+			// Retrieve the patient_id associated with the provided patient_dni
+			const { data: patientData, error: patientError } = await supabase
+				.from("patients")
+				.select("patient_id")
+				.eq("patient_dni", patientId)
+				.single();
+
+			if (patientError) {
+				throw patientError;
+			}
+
 			let query = supabase
 				.from("appointments")
 				.select(
@@ -90,14 +105,14 @@ export default function Home() {
                  appointment_type, 
                  doctors:appointment_doctor_id (doctor_first_name, doctor_last_name)`
 				)
-				.eq("appointment_patient_id", patientId);
+				.gt("appointment_date", new Date().toISOString().split("T")[0])
+				.eq("appointment_patient_id", patientData.patient_id);
 
 			if (professional) {
 				query = query.eq("appointment_doctor_id", professional);
 			}
 
 			const { data, error } = await query
-				// .gte("appointment_date", new Date().toISOString().split("T")[0])
 				.returns<Appointment[]>()
 				.order("appointment_date", { ascending: true });
 
@@ -161,16 +176,35 @@ export default function Home() {
 	};
 
 	const saveAppointment = async () => {
-		const { data, error } = await supabase.from("appointments").insert([
-			{
-				appointment_patient_id: patientId,
-				appointment_doctor_id: professional,
-				appointment_type: appointmentType,
-				appointment_date: date,
-				appointment_time: time,
-			},
-		]);
-		if (error) {
+		try {
+			// Retrieve the patient_id associated with the provided patient_dni
+			const { data: patientData, error: patientError } = await supabase
+				.from("patients")
+				.select("patient_id")
+				.eq("patient_dni", patientId)
+				.single();
+
+			if (patientError) {
+				throw patientError;
+			}
+
+			// Use the retrieved patient_id when inserting the appointment
+			const { data, error } = await supabase.from("appointments").insert([
+				{
+					appointment_patient_id: patientData.patient_id,
+					appointment_doctor_id: professional,
+					appointment_type: appointmentType,
+					appointment_date: date,
+					appointment_time: time,
+				},
+			]);
+
+			if (error) {
+				throw error;
+			}
+
+			console.log("Appointment saved successfully:", data);
+		} catch (error) {
 			console.error("Error saving appointment:", error.message);
 		}
 	};
@@ -186,11 +220,31 @@ export default function Home() {
 		setDate(date);
 	};
 
+	const handleLoginModalOpen = () => {
+		setIsLoginModalOpen(true);
+	};
+	const handleLoginModalClose = () => {
+		setIsLoginModalOpen(false);
+		setUsername("");
+		setPassword("");
+	};
+
 	// Function to handle time change
 	const handleTimeChange = (e: {
 		target: { value: React.SetStateAction<string> };
 	}) => {
 		setTime(e.target.value);
+	};
+
+	const handleLogin = (e) => {
+		e.preventDefault();
+		if (username === "admin" && password === "password") {
+			setIsLoginModalOpen(false);
+			setUsername("");
+			setPassword("");
+		} else {
+			alert("Usuario o contraseña invalidos.");
+		}
 	};
 
 	return (
@@ -203,18 +257,15 @@ export default function Home() {
 					</span>
 				</a>
 				<nav className="ml-auto flex gap-4 sm:gap-6">
-					<a
-						href="#"
+					<Button
 						className="text-sm font-medium hover:underline underline-offset-4"
+						onClick={handleLoginModalOpen}
 					>
 						Administrador
-					</a>
-					<a
-						href="#"
-						className="text-sm font-medium hover:underline underline-offset-4"
-					>
+					</Button>
+					<Button className="text-sm font-medium hover:underline underline-offset-4">
 						Paciente
-					</a>
+					</Button>
 				</nav>
 			</header>
 			<main className="flex-1">
@@ -285,11 +336,9 @@ export default function Home() {
 						</div>
 					</div>
 				</section>
-				{/* Modal */}
 				<Dialog open={isModalOpen} onOpenChange={handleModalClose}>
 					<DialogContent className="sm:max-w-[500px] sm:min-h-[495px] sm:max-h-[500px]">
 						<DialogHeader>
-							{/* Tab Navigation */}
 							<button
 								className={`p-4 ${
 									activeTab === "reservar"
@@ -310,11 +359,6 @@ export default function Home() {
 							>
 								Mis Turnos
 							</button>
-							{/* <DialogTitle>
-								{activeTab === "reservar"
-									? "Reservar Turno"
-									: "Mis Turnos"}
-							</DialogTitle> */}
 						</DialogHeader>
 						{activeTab === "reservar" ? (
 							<form
@@ -404,6 +448,7 @@ export default function Home() {
 										selected={date}
 										onChange={handleDateChange}
 										dateFormat="dd/MM/yyyy"
+                                        minDate={new Date()}
 										required
 										className="col-span-3 px-3 py-2 border rounded-md text-sm text-gray-700 focus:ring-1 focus:ring-primary focus:border-primary"
 									/>
@@ -439,13 +484,13 @@ export default function Home() {
 								<DialogFooter>
 									<button
 										type="submit"
-										className="inline-flex h-10 items-center justify-center rounded-md bg-green-700 px-8 text-sm font-medium text-white shadow transition-colors hover:bg-gray-800 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-gray-700 disabled:pointer-events-none disabled:opacity-50"
+										className="bg-gray-900 inline-flex h-10 items-center justify-center rounded-md px-8 text-sm font-medium text-white shadow transition-colors hover:bg-gray-800 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-gray-700 disabled:pointer-events-none disabled:opacity-50"
 									>
 										Confirmar Turno
 									</button>
 									<button
 										type="button"
-										className="inline-flex h-10 items-center justify-center rounded-md bg-red-700 px-8 text-sm font-medium text-white shadow transition-colors hover:bg-gray-800 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-gray-700 disabled:pointer-events-none disabled:opacity-50"
+										className="inline-flex h-10 items-center justify-center rounded-md px-8 text-sm font-bold text-black shadow transition-colors hover:bg-gray-100 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-gray-700 disabled:pointer-events-none disabled:opacity-50"
 										onClick={handleModalClose}
 									>
 										Cancelar
@@ -460,22 +505,22 @@ export default function Home() {
 											(appointment, index) => (
 												<li
 													key={index}
-													className="border p-2 rounded-md"
+													className="border p-2 rounded-md bg-gray-900 text-white"
 												>
 													<p>
-														Fecha:{" "}
 														{new Date(
 															appointment.appointment_date
-														).toLocaleDateString()}
-													</p>
-													<p>
-														Hora:{" "}
+														).toLocaleDateString()}{" "}
 														{
 															appointment.appointment_time
 														}
 													</p>
 													<p>
-														Doctor:{" "}
+														{
+															appointment.appointment_type
+														}
+													</p>
+													<p>
 														{
 															appointment.doctors
 																.doctor_first_name
@@ -498,11 +543,77 @@ export default function Home() {
 						)}
 					</DialogContent>
 				</Dialog>
+				<Dialog
+					open={isLoginModalOpen}
+					onOpenChange={setIsLoginModalOpen}
+				>
+					<DialogContent className="sm:max-w-[450px]">
+						<DialogHeader>
+							<DialogTitle>Administrador</DialogTitle>
+							<DialogDescription>
+								Por favor ingrese su usuario y contraseña para
+								acceder al panel de administrador.
+							</DialogDescription>
+						</DialogHeader>
+						<form
+							onSubmit={handleLogin}
+							className="grid gap-4 py-4"
+						>
+							<div className="grid items-center grid-cols-4 gap-4">
+								<Label
+									htmlFor="username"
+									className="text-right"
+								>
+									Usuario
+								</Label>
+								<Input
+									id="username"
+									value={username}
+									onChange={(e) =>
+										setUsername(e.target.value)
+									}
+									className="col-span-3"
+								/>
+							</div>
+							<div className="grid items-center grid-cols-4 gap-4">
+								<Label
+									htmlFor="password"
+									className="text-right"
+								>
+									Contraseña
+								</Label>
+								<Input
+									id="password"
+									type="password"
+									value={password}
+									onChange={(e) =>
+										setPassword(e.target.value)
+									}
+									className="col-span-3"
+								/>
+							</div>
+							<DialogFooter>
+								<button
+									type="submit"
+									className="bg-gray-900 inline-flex h-10 items-center justify-center rounded-md px-8 text-sm font-medium text-white shadow transition-colors hover:bg-gray-800 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-gray-700 disabled:pointer-events-none disabled:opacity-50"
+								>
+									Ingresar
+								</button>
+								<button
+									className="inline-flex h-10 items-center justify-center rounded-md px-8 text-sm font-bold text-black shadow transition-colors hover:bg-gray-100 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-gray-700 disabled:pointer-events-none disabled:opacity-50"
+									onClick={handleLoginModalClose}
+								>
+									Cancelar
+								</button>
+							</DialogFooter>
+						</form>
+					</DialogContent>
+				</Dialog>
 			</main>
 			<footer className="bg-gray-900 text-white px-4 lg:px-6 py-4">
 				<div className="container mx-auto text-center">
 					<p className="text-sm">
-						© 2024 Clinica SePrice. All rights reserved.
+						© 2024 Clinica SePrice. Todos los derechos reservados.
 					</p>
 				</div>
 			</footer>

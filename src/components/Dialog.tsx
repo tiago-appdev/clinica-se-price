@@ -1,15 +1,19 @@
-import React, { useState } from "react";
+import React from "react";
 
 const Dialog = ({ children, open, onOpenChange }) => {
-  if (!open) return null;
+  const handleClose = () => {
+    if (onOpenChange) {
+      onOpenChange(false);
+    }
+  };
 
-  return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50">
-      <div className="bg-white rounded-md shadow-lg max-w-lg w-full">
+  return open ? (
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50" onClick={handleClose}>
+      <div className="bg-white rounded-md shadow-lg max-w-lg w-full" onClick={(e) => e.stopPropagation()}>
         {children}
       </div>
     </div>
-  );
+  ) : null;
 };
 
 const DialogContent = ({ children, className, ...props }) => (
