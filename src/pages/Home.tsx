@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useEffect, useState } from "react";
-import { supabase } from '../../supabase';
+import { supabase } from "../../supabase";
 import {
 	Dialog,
 	DialogContent,
@@ -17,19 +17,34 @@ import "react-datepicker/dist/react-datepicker.css";
 
 export default function Home() {
 	const [isModalOpen, setIsModalOpen] = useState(false);
-	const [id, setId] = useState("");
+	const [patientId, setPatientId] = useState("");
 	const [professionals, setProfessionals] = useState<any[]>([]);
 	const [professional, setProfessional] = useState("");
-	const [appointmentType, setAppointmentType] = useState("");
+	const [appointmentType, setAppointmentType] = useState("Atención Medica");
 	const [date, setDate] = useState(new Date());
-	const [time, setTime] = useState("08:30"); // Initial time value);
+	const [time, setTime] = useState("08:00");
+	const [availableTimes, setAvailableTimes] = useState<string[]>(
+		generateTimeOptions()
+	);
+	const [activeTab, setActiveTab] = useState("reservar");
+
+	interface Appointment {
+		appointment_time: string;
+		appointment_date: string;
+		appointment_doctor_id: string;
+		appointment_type: string;
+		doctors: {
+			doctor_first_name: string;
+			doctor_last_name: string;
+		};
+	}
+
+	const [appointments, setAppointments] = useState<Appointment[]>([]);
 
 	// Function to fetch professionals from Supabase
 	const fetchProfessionals = async () => {
 		try {
-			const { data, error } = await supabase
-				.from("doctors")
-				.select("*");
+			const { data, error } = await supabase.from("doctors").select("*");
 			if (error) {
 				throw error;
 			}
@@ -44,43 +59,127 @@ export default function Home() {
 		fetchProfessionals();
 	}, []);
 
+	// Fetch appointments for the selected professional and date
+	const fetchDoctorAppointments = async () => {
+		try {
+			const { data, error } = await supabase
+				.from("appointments")
+				.select("appointment_time")
+				.eq("appointment_doctor_id", professional)
+				.eq("appointment_date", date.toISOString().split("T")[0]);
+			if (error) {
+				throw error;
+			}
+			const bookedTimes = data.map(
+				(appointment) => appointment.appointment_time
+			);
+			updateAvailableTimes(bookedTimes);
+		} catch (error) {
+			console.error("Error fetching appointments:", error.message);
+		}
+	};
+	// Fetch appointments for the selected patient
+	const fetchPatientAppointments = async () => {
+		try {
+			let query = supabase
+				.from("appointments")
+				.select(
+					`appointment_time, 
+                 appointment_date, 
+                 appointment_doctor_id, 
+                 appointment_type, 
+                 doctors:appointment_doctor_id (doctor_first_name, doctor_last_name)`
+				)
+				.eq("appointment_patient_id", patientId);
+
+			if (professional) {
+				query = query.eq("appointment_doctor_id", professional);
+			}
+
+			const { data, error } = await query
+				// .gte("appointment_date", new Date().toISOString().split("T")[0])
+				.returns<Appointment[]>()
+				.order("appointment_date", { ascending: true });
+
+			if (error) {
+				throw error;
+			}
+			setAppointments(data);
+		} catch (error) {
+			console.error("Error fetching appointments:", error.message);
+		}
+	};
+
+	// Update available times based on booked times
+	const updateAvailableTimes = (bookedTimes: string | any[]) => {
+		const allTimes = generateTimeOptions();
+		const filteredTimes = allTimes.filter(
+			(time) => !bookedTimes.includes(time + ":00")
+		);
+		setAvailableTimes(filteredTimes);
+	};
+
+	// Fetch appointments when professional or date changes
+	useEffect(() => {
+		if (professional && date) {
+			fetchDoctorAppointments();
+		}
+	}, [professional, date]);
+
+	useEffect(() => {
+		handlePatientIdBlur();
+	}, [professional]);
+
+	// Function to handle ID input blur event
+	const handlePatientIdBlur = async () => {
+		if (patientId) {
+			await fetchPatientAppointments();
+		}
+	};
+
 	const handleModalOpen = () => {
 		setIsModalOpen(true);
 	};
 	const handleModalClose = () => {
 		setIsModalOpen(false);
-		setId("");
+		setPatientId("");
 		setProfessional("");
-		setDate(new Date())
-		setTime("08:30");
+		setDate(new Date());
+		setTime("08:00");
+		setActiveTab("reservar");
+		setAppointments([]);
 	};
 	const handleSubmit = (e) => {
 		e.preventDefault();
-		console.log("ID:", id);
+		console.log("ID:", patientId);
 		console.log("Professional:", professional);
 		console.log("Appointment Type:", appointmentType);
 		console.log("Date:", date);
 		console.log("Time:", time);
-        saveAppointment();
+		saveAppointment();
 		handleModalClose();
 	};
 
-    const saveAppointment = async () => {
-        const { data, error } = await supabase
-            .from('appointments')
-            .insert([
-                {
-                    patient_id: id,
-                    doctor_id: professional,
-                    appointment_type: appointmentType,
-                    appointment_date: date,
-                    appointment_time: time,
-                },
-            ]);
-        if (error) {
-            console.error('Error saving appointment:', error.message);
-        }
-    }
+	const saveAppointment = async () => {
+		const { data, error } = await supabase.from("appointments").insert([
+			{
+				appointment_patient_id: patientId,
+				appointment_doctor_id: professional,
+				appointment_type: appointmentType,
+				appointment_date: date,
+				appointment_time: time,
+			},
+		]);
+		if (error) {
+			console.error("Error saving appointment:", error.message);
+		}
+	};
+
+	const handleProfessionalChange = (e: {
+		target: { value: React.SetStateAction<string> };
+	}) => {
+		setProfessional(e.target.value);
+	};
 
 	// Function to handle date change
 	const handleDateChange = (date: React.SetStateAction<Date>) => {
@@ -88,7 +187,9 @@ export default function Home() {
 	};
 
 	// Function to handle time change
-	const handleTimeChange = (e: { target: { value: React.SetStateAction<string>; }; }) => {
+	const handleTimeChange = (e: {
+		target: { value: React.SetStateAction<string> };
+	}) => {
 		setTime(e.target.value);
 	};
 
@@ -97,7 +198,9 @@ export default function Home() {
 			<header className="bg-gray-900 text-white px-4 lg:px-6 h-14 flex items-center">
 				<a href="#" className="flex items-center justify-center">
 					<CrossIcon className="h-6 w-6" />
-					<span className="font-bold text-lg">Clinica SePrice</span>
+					<span className="font-bold text-lg p-1">
+						Clinica SePrice
+					</span>
 				</a>
 				<nav className="ml-auto flex gap-4 sm:gap-6">
 					<a
@@ -118,6 +221,7 @@ export default function Home() {
 				<section className="flex items-center justify-center w-full py-12 md:py-24 lg:py-32">
 					<div className="container px-4 md:px-6 space-y-8">
 						<div className="grid max-w-[800px] mx-auto gap-4 text-center">
+							{/* <CrossIcon className="h-20 w-20 inline-flex items-center justify-center" /> */}
 							<h1 className="text-3xl font-bold tracking-tighter sm:text-4xl md:text-5xl">
 								Bienvenido a Clinica SePrice
 							</h1>
@@ -160,10 +264,10 @@ export default function Home() {
 							<div className="flex flex-col items-center justify-center space-y-2 p-4">
 								<MicroscopeIcon className="h-8 w-8" />
 								<h3 className="text-lg font-semibold">
-									Diagnósticos
+									Laboratorios
 								</h3>
 								<p className="text-gray-500 text-center dark:text-gray-400">
-									Servicios de diagnóstico avanzados para
+									Servicios de laboratorio avanzados para
 									identificar y abordar sus inquietudes de
 									salud.
 								</p>
@@ -171,162 +275,237 @@ export default function Home() {
 							<div className="flex flex-col items-center justify-center space-y-2 p-4">
 								<StethoscopeIcon className="h-8 w-8" />
 								<h3 className="text-lg font-semibold">
-									Atención de Urgencia
+									Pediatría
 								</h3>
 								<p className="text-gray-500 text-center dark:text-gray-400">
-									Atención rápida y eficiente para necesidades
-									médicas inesperadas.
+									Atención médica integral para los más
+									pequeños.
 								</p>
 							</div>
 						</div>
 					</div>
 				</section>
+				{/* Modal */}
+				<Dialog open={isModalOpen} onOpenChange={handleModalClose}>
+					<DialogContent className="sm:max-w-[500px] sm:min-h-[495px] sm:max-h-[500px]">
+						<DialogHeader>
+							{/* Tab Navigation */}
+							<button
+								className={`p-4 ${
+									activeTab === "reservar"
+										? "border-b-2 border-gray-900 font-semibold"
+										: ""
+								}`}
+								onClick={() => setActiveTab("reservar")}
+							>
+								Reservar Turno
+							</button>
+							<button
+								className={`p-4 ${
+									activeTab === "mis-turnos"
+										? "border-b-2 border-gray-900 font-semibold"
+										: ""
+								}`}
+								onClick={() => setActiveTab("mis-turnos")}
+							>
+								Mis Turnos
+							</button>
+							{/* <DialogTitle>
+								{activeTab === "reservar"
+									? "Reservar Turno"
+									: "Mis Turnos"}
+							</DialogTitle> */}
+						</DialogHeader>
+						{activeTab === "reservar" ? (
+							<form
+								onSubmit={handleSubmit}
+								className="grid gap-4 py-4"
+							>
+								<div className="grid items-center grid-cols-4 gap-4">
+									<Label
+										htmlFor="patientId"
+										className="text-right"
+									>
+										DNI
+									</Label>
+									<Input
+										id="patientId"
+										value={patientId}
+										onChange={(e) =>
+											setPatientId(e.target.value)
+										}
+										onBlur={handlePatientIdBlur}
+										type="text"
+										placeholder="Ingrese su DNI. Sin puntos."
+										required
+										className="col-span-3"
+									/>
+								</div>
+								<div className="grid items-center grid-cols-4 gap-4">
+									<Label
+										htmlFor="professional"
+										className="text-right"
+									>
+										Profesional
+									</Label>
+									<select
+										id="professional"
+										value={professional}
+										onChange={handleProfessionalChange}
+										required
+										className="col-span-3 block w-full px-3 py-2 border rounded-md text-sm text-gray-700 focus:ring-1 focus:ring-primary focus:border-primary"
+									>
+										<option value="">
+											Seleccione un profesional
+										</option>
+										{professionals.map((prof) => (
+											<option
+												key={prof.doctor_id}
+												value={prof.doctor_id}
+											>
+												{prof.doctor_first_name}
+											</option>
+										))}
+									</select>
+								</div>
+								<div className="grid items-center grid-cols-4 gap-4">
+									<Label
+										htmlFor="appointmentType"
+										className="text-right"
+									>
+										Tipo de Turno
+									</Label>
+									<select
+										id="appointmentType"
+										value={appointmentType}
+										onChange={(e) =>
+											setAppointmentType(e.target.value)
+										}
+										required
+										className="col-span-3 block w-full px-3 py-2 border rounded-md text-sm text-gray-700 focus:ring-1 focus:ring-primary focus:border-primary"
+									>
+										<option value="Atención Medica">
+											Atención Medica
+										</option>
+										<option value="Análisis Clínicos">
+											Análisis Clínicos
+										</option>
+									</select>
+								</div>
+								<div className="grid items-center grid-cols-4 gap-4">
+									<Label
+										htmlFor="date"
+										className="text-right"
+									>
+										Fecha
+									</Label>
+									<DatePicker
+										id="date"
+										selected={date}
+										onChange={handleDateChange}
+										dateFormat="dd/MM/yyyy"
+										required
+										className="col-span-3 px-3 py-2 border rounded-md text-sm text-gray-700 focus:ring-1 focus:ring-primary focus:border-primary"
+									/>
+								</div>
+								<div className="grid items-center grid-cols-4 gap-4">
+									<Label
+										htmlFor="time"
+										className="text-right"
+									>
+										Hora
+									</Label>
+									<div>
+										<select
+											id="time"
+											value={time}
+											onChange={handleTimeChange}
+											required
+											className="col-span-3 px-3 py-2 border rounded-md text-sm text-gray-700 focus:ring-1 focus:ring-primary focus:border-primary"
+										>
+											{availableTimes.map(
+												(timeOption) => (
+													<option
+														key={timeOption}
+														value={timeOption}
+													>
+														{timeOption}
+													</option>
+												)
+											)}
+										</select>
+									</div>
+								</div>
+								<DialogFooter>
+									<button
+										type="submit"
+										className="inline-flex h-10 items-center justify-center rounded-md bg-green-700 px-8 text-sm font-medium text-white shadow transition-colors hover:bg-gray-800 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-gray-700 disabled:pointer-events-none disabled:opacity-50"
+									>
+										Confirmar Turno
+									</button>
+									<button
+										type="button"
+										className="inline-flex h-10 items-center justify-center rounded-md bg-red-700 px-8 text-sm font-medium text-white shadow transition-colors hover:bg-gray-800 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-gray-700 disabled:pointer-events-none disabled:opacity-50"
+										onClick={handleModalClose}
+									>
+										Cancelar
+									</button>
+								</DialogFooter>
+							</form>
+						) : (
+							<div className="overflow-auto sm:max-h-[20rem]">
+								<ul className="space-y-2">
+									{appointments.length > 0 ? (
+										appointments.map(
+											(appointment, index) => (
+												<li
+													key={index}
+													className="border p-2 rounded-md"
+												>
+													<p>
+														Fecha:{" "}
+														{new Date(
+															appointment.appointment_date
+														).toLocaleDateString()}
+													</p>
+													<p>
+														Hora:{" "}
+														{
+															appointment.appointment_time
+														}
+													</p>
+													<p>
+														Doctor:{" "}
+														{
+															appointment.doctors
+																.doctor_first_name
+														}{" "}
+														{
+															appointment.doctors
+																.doctor_last_name
+														}
+													</p>
+												</li>
+											)
+										)
+									) : (
+										<li className="border p-2 rounded-md">
+											<p>No hay turnos.</p>
+										</li>
+									)}
+								</ul>
+							</div>
+						)}
+					</DialogContent>
+				</Dialog>
 			</main>
-			<footer className="bg-gray-900 text-white px-4 md:px-6 py-6 w-full shrink-0">
-				<div className="container flex flex-col sm:flex-row items-center justify-between gap-4">
+			<footer className="bg-gray-900 text-white px-4 lg:px-6 py-4">
+				<div className="container mx-auto text-center">
 					<p className="text-sm">
-						&copy; 2024 Clinica SePrice. Todos los derechos
-						reservados.
+						© 2024 Clinica SePrice. All rights reserved.
 					</p>
-					<nav className="flex gap-4 sm:gap-6">
-						<a
-							href="#"
-							className="text-sm hover:underline underline-offset-4"
-						>
-							Términos de Servicio
-						</a>
-						<a
-							href="#"
-							className="text-sm hover:underline underline-offset-4"
-						>
-							Política de Privacidad
-						</a>
-						<a
-							href="#"
-							className="text-sm hover:underline underline-offset-4"
-						>
-							Descargo de responsabilidad
-						</a>
-						<a
-							href="#"
-							className="text-sm hover:underline underline-offset-4"
-						>
-							Contáctenos
-						</a>
-					</nav>
 				</div>
 			</footer>
-			<Dialog open={isModalOpen} onOpenChange={setIsModalOpen}>
-				<DialogContent className="sm:max-w-[450px]">
-					<DialogHeader>
-						<DialogTitle>Reservar Turno</DialogTitle>
-						<DialogDescription>
-							Por favor, proporcione la siguiente información para
-							reservar su turno.
-						</DialogDescription>
-					</DialogHeader>
-					<form onSubmit={handleSubmit} className="grid gap-4 py-4">
-						<div className="grid items-center grid-cols-4 gap-4">
-							<Label htmlFor="id" className="text-right">
-								DNI
-							</Label>
-							<Input
-								id="id"
-								value={id}
-								onChange={(e) => setId(e.target.value)}
-								className="col-span-3"
-							/>
-						</div>
-						<div className="grid items-center grid-cols-4 gap-4">
-							<Label
-								htmlFor="professional"
-								className="text-right"
-							>
-								Profesional
-							</Label>
-							<select
-								id="professional"
-								value={professional}
-								onChange={(e) =>
-									setProfessional(e.target.value)
-								}
-								className="col-span-3 block w-full px-3 py-2 border rounded-md text-sm text-gray-700 focus:ring-1 focus:ring-primary focus:border-primary"
-							>
-								<option value="">
-									Seleccione un profesional
-								</option>
-								{professionals.map((prof) => (
-									<option key={prof.doctor_id} value={prof.doctor_id}>
-										{prof.first_name}
-									</option>
-								))}
-							</select>
-						</div>
-                        <div className="grid items-center grid-cols-4 gap-4">
-							<Label
-								htmlFor="appointmentType"
-								className="text-right"
-							>
-								Tipo de Turno
-							</Label>
-							<select
-								id="appointmentType"
-								value={appointmentType}
-								onChange={(e) =>
-									setAppointmentType(e.target.value)
-								}
-								className="col-span-3 block w-full px-3 py-2 border rounded-md text-sm text-gray-700 focus:ring-1 focus:ring-primary focus:border-primary"
-							>
-								<option value="Atención Medica">Atención Medica</option>
-								<option value="Análisis Clínicos">Análisis Clínicos</option>
-							</select>
-						</div>
-						<div className="grid items-center grid-cols-4 gap-4">
-							<Label htmlFor="date" className="text-right">
-								Fecha
-							</Label>
-							<DatePicker
-								id="date"
-								selected={date}
-								onChange={handleDateChange}
-								dateFormat="dd/MM/yyyy"
-								className="col-span-3 px-3 py-2 border rounded-md text-sm text-gray-700 focus:ring-1 focus:ring-primary focus:border-primary"
-							/>
-						</div>
-						<div className="grid items-center grid-cols-4 gap-4">
-							<Label htmlFor="time" className="text-right">
-								Hora
-							</Label>
-							<div>
-								<select
-									id="time"
-									value={time}
-									onChange={handleTimeChange}
-									className="col-span-3 px-3 py-2 border rounded-md text-sm text-gray-700 focus:ring-1 focus:ring-primary focus:border-primary"
-								>
-									{/* Generate options for time */}
-									{generateTimeOptions()}
-								</select>
-							</div>
-						</div>
-						<DialogFooter>
-							<button
-								type="submit"
-								className="inline-flex h-10 items-center justify-center rounded-md bg-green-700 px-8 text-sm font-medium text-white shadow transition-colors hover:bg-gray-800 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-gray-700 disabled:pointer-events-none disabled:opacity-50"
-							>
-								Confirmar Turno
-							</button>
-							<button
-								type="button"
-								className="inline-flex h-10 items-center justify-center rounded-md bg-red-700 px-8 text-sm font-medium text-white shadow transition-colors hover:bg-gray-800 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-gray-700 disabled:pointer-events-none disabled:opacity-50"
-								onClick={handleModalClose}
-							>
-								Cancelar
-							</button>
-						</DialogFooter>
-					</form>
-				</DialogContent>
-			</Dialog>
 		</div>
 	);
 }
@@ -359,7 +538,7 @@ function HeartPulseIcon(props) {
 			height="24"
 			viewBox="0 0 24 24"
 			fill="none"
-			stroke="currentColor"
+			stroke="red"
 			strokeWidth="2"
 			strokeLinecap="round"
 			strokeLinejoin="round"
@@ -379,7 +558,7 @@ function MicroscopeIcon(props) {
 			height="24"
 			viewBox="0 0 24 24"
 			fill="none"
-			stroke="currentColor"
+			stroke="blue"
 			strokeWidth="2"
 			strokeLinecap="round"
 			strokeLinejoin="round"
@@ -403,7 +582,7 @@ function StethoscopeIcon(props) {
 			height="24"
 			viewBox="0 0 24 24"
 			fill="none"
-			stroke="currentColor"
+			stroke="pink"
 			strokeWidth="2"
 			strokeLinecap="round"
 			strokeLinejoin="round"
@@ -416,32 +595,15 @@ function StethoscopeIcon(props) {
 }
 
 // Function to generate time options
-const generateTimeOptions = (): JSX.Element[] => {
-	const startTime = new Date();
-	startTime.setHours(8, 30, 0); // Start time: 08:30
-	const endTime = new Date();
-	endTime.setHours(12, 20, 0); // End time: 12:20
-
-	const timeOptions: JSX.Element[] = [];
-	let currentTime = new Date(startTime);
-
-	// Loop to generate options every 10 minutes
-	while (currentTime <= endTime) {
-		const optionValue = `${currentTime
-			.getHours()
-			.toString()
-			.padStart(2, "0")}:${currentTime
-			.getMinutes()
-			.toString()
-			.padStart(2, "0")}`;
-		const optionLabel = `${optionValue}`;
-		timeOptions.push(
-			<option key={optionValue} value={optionValue}>
-				{optionLabel}
-			</option>
-		);
-		currentTime.setMinutes(currentTime.getMinutes() + 10);
+function generateTimeOptions() {
+	const times: string[] = [];
+	for (let hour = 8; hour < 19; hour++) {
+		for (let minutes = 0; minutes < 60; minutes += 30) {
+			const time = `${hour.toString().padStart(2, "0")}:${minutes
+				.toString()
+				.padStart(2, "0")}`;
+			times.push(time);
+		}
 	}
-
-	return timeOptions;
-};
+	return times;
+}

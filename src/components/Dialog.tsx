@@ -18,9 +18,9 @@ const DialogContent = ({ children, className, ...props }) => (
   </div>
 );
 
-const DialogHeader = ({ children }) => <div className="border-b p-4">{children}</div>;
+const DialogHeader = ({ children }) => <div className="p-4">{children}</div>;
 const DialogTitle = ({ children }) => <h2 className="text-lg font-semibold">{children}</h2>;
 const DialogDescription = ({ children }) => <p className="text-sm text-gray-500">{children}</p>;
-const DialogFooter = ({ children }) => <div className="border-t p-4 flex justify-end space-x-2">{children}</div>;
+const DialogFooter = ({ children }) => <div className="border-t p-4 flex justify-center space-x-2">{children}</div>;
 
 export { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter };
