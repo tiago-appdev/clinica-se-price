@@ -1,12 +1,13 @@
-import React from 'react';
 import NavBar from '../components/NavBar';
 
-const DashboardAdmin = () => {
+const PatientPage = () => {
   return (
     <>
       <NavBar message='Logout' />
+
+      <h1>Patient Page</h1>
     </>
   );
 };
 
-export default DashboardAdmin;
+export default PatientPage;

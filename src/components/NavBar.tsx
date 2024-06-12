@@ -1,8 +1,10 @@
 import React from 'react';
 import { useAuth } from '../context/AuthContext';
 import { CrossIcon } from '../icons/icons';
+import { useNavigate } from 'react-router-dom';
 
-const NavBar = () => {
+const NavBar = ({ message }) => {
+  const navigate = useNavigate();
   const { logout } = useAuth();
   return (
     <header className='bg-gray-900 text-white px-4 lg:px-6 h-14 flex items-center'>
@@ -17,10 +19,11 @@ const NavBar = () => {
         <button
           onClick={() => {
             logout();
+            navigate('/', { replace: true });
           }}
           className='text-sm font-medium hover:underline underline-offset-4'
         >
-          Logout
+          {message}
         </button>
       </nav>
     </header>
