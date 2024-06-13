@@ -64,13 +64,13 @@ const ModalPatients = ({ isOpen, onClose }) => {
         {error && (
           <span className='text-red-500'>Credenciales incorrectas</span>
         )}
-        <div className='mt-4 text-center'>
+        <div className='mt-4 text-end'>
           <span className='text-gray-700'>¿No estás registrado? </span>
           <button
             onClick={() => navigate('/register')}
-            className='text-blue-500 underline'
+            className='text-blue-500 ml-2 underline'
           >
-            Regístrate
+            Registrate
           </button>
         </div>
         <div className='flex justify-end mt-4'>
