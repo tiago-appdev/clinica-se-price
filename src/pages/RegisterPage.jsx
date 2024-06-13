@@ -73,7 +73,6 @@ const RegisterPage = () => {
             patient_updated_at: new Date(),
           },
         ]);
-
       if (patientError) throw patientError;
 
       alert('Paciente registrado exitosamente!');

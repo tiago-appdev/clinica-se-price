@@ -373,6 +373,24 @@ export default function Home() {
                 </div>
                 <div className='grid items-center grid-cols-4 gap-4'>
                   <Label
+                    htmlFor='appointmentType'
+                    className='text-right'
+                  >
+                    Tipo de Turno
+                  </Label>
+                  <select
+                    id='appointmentType'
+                    value={appointmentType}
+                    onChange={(e) => setAppointmentType(e.target.value)}
+                    required
+                    className='col-span-3 block w-full px-3 py-2 border rounded-md text-sm text-gray-700 focus:ring-1 focus:ring-primary focus:border-primary'
+                  >
+                    <option value='Atención Medica'>Atención Medica</option>
+                    <option value='Análisis Clínicos'>Análisis Clínicos</option>
+                  </select>
+                </div>
+                <div className='grid items-center grid-cols-4 gap-4'>
+                  <Label
                     htmlFor='professional'
                     className='text-right'
                   >
@@ -394,24 +412,6 @@ export default function Home() {
                         {prof.doctor_first_name}
                       </option>
                     ))}
-                  </select>
-                </div>
-                <div className='grid items-center grid-cols-4 gap-4'>
-                  <Label
-                    htmlFor='appointmentType'
-                    className='text-right'
-                  >
-                    Tipo de Turno
-                  </Label>
-                  <select
-                    id='appointmentType'
-                    value={appointmentType}
-                    onChange={(e) => setAppointmentType(e.target.value)}
-                    required
-                    className='col-span-3 block w-full px-3 py-2 border rounded-md text-sm text-gray-700 focus:ring-1 focus:ring-primary focus:border-primary'
-                  >
-                    <option value='Atención Medica'>Atención Medica</option>
-                    <option value='Análisis Clínicos'>Análisis Clínicos</option>
                   </select>
                 </div>
                 <div className='grid items-center grid-cols-4 gap-4'>
