@@ -177,6 +177,7 @@ export default function Home() {
     console.log('Time:', time);
     saveAppointment();
     handleModalClose();
+    alert('Cita reservada con exito');
   };
 
   const saveAppointment = async () => {
@@ -231,7 +232,7 @@ export default function Home() {
 
   return (
     <div className='flex flex-col min-h-[100dvh]'>
-      <header className='bg-gray-900 text-white px-4 lg:px-6 h-14 flex items-center'>
+      <header className='bg-gray-900 text-white px-4 lg:px-6 h-12 flex items-center'>
         <a
           href='#'
           className='flex items-center justify-center'

@@ -90,7 +90,7 @@ const RegisterPage = () => {
         onSubmit={handleSubmit}
         className='max-w-xl mx-auto flex-grow p-4 mt-8 bg-zinc-100 rounded-lg shadow-lg'
       >
-        <h1 className='text-2xl mb-4'>Registro de Paciente</h1>
+        <h1 className='text-2xl mb-4 font-bold'>Registro de Paciente</h1>
 
         <div className='flex w-full justify-between'>
           <div className='mb-4 w-1/2'>
@@ -264,6 +264,7 @@ const RegisterPage = () => {
             onChange={handleChange}
             className='w-full border px-2 py-1'
             required
+            style={{ resize: 'none' }}
           ></textarea>
         </div>
 
@@ -272,7 +273,7 @@ const RegisterPage = () => {
             type='submit'
             className='w-9/12 text-center bg-blue-500 text-white py-2 rounded-md'
           >
-            Register
+            Registrar
           </button>
         </div>
       </form>

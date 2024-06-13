@@ -17,6 +17,7 @@ const AdminLoginModal = ({ isOpen, onClose }) => {
       .select('*')
       .eq('username', username)
       .eq('password', password)
+      .eq('role', 'admin')
       .single();
 
     if (error || !data) {

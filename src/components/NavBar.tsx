@@ -7,7 +7,7 @@ const NavBar = ({ message }) => {
   const navigate = useNavigate();
   const { logout } = useAuth();
   return (
-    <header className='bg-gray-900 text-white px-4 lg:px-6 h-14 flex items-center'>
+    <header className='bg-gray-900 text-white px-4 lg:px-6 h-12 flex items-center'>
       <button
         onClick={() => {
           logout();
