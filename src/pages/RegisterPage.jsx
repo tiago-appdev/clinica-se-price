@@ -84,11 +84,11 @@ const RegisterPage = () => {
   };
 
   return (
-    <div className='h-screen relative'>
+    <div className='h-screen'>
       <NavBar message={'Salir'} />
       <form
         onSubmit={handleSubmit}
-        className='max-w-xl mx-auto flex-grow p-4 mt-8 bg-zinc-100 rounded-lg shadow-lg'
+        className='max-w-xl mx-auto p-4 my-7 bg-zinc-100 rounded-lg shadow-lg'
       >
         <h1 className='text-2xl mb-4 font-bold'>Registro de Paciente</h1>
 

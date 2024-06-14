@@ -170,11 +170,6 @@ export default function Home() {
   };
   const handleSubmit = (e) => {
     e.preventDefault();
-    console.log('ID:', patientId);
-    console.log('Professional:', professional);
-    console.log('Appointment Type:', appointmentType);
-    console.log('Date:', date);
-    console.log('Time:', time);
     saveAppointment();
     handleModalClose();
     alert('Cita reservada con exito');
@@ -229,6 +224,10 @@ export default function Home() {
   }) => {
     setTime(e.target.value);
   };
+
+  // const toggleEditModal = () => {
+  //   setIsEditModalOpen(!isEditModalOpen);
+  // };
 
   return (
     <div className='flex flex-col min-h-[100dvh]'>

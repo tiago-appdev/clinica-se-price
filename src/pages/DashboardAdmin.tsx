@@ -1,12 +1,13 @@
 import React from 'react';
 import NavBar from '../components/NavBar';
 import { Footer } from '../components';
+import UserTable from '../components/UserTable';
 
 const DashboardAdmin = () => {
   return (
-    <div className='h-screen w-full relative'>
+    <div className='h-screen w-full'>
       <NavBar message='Logout' />
-      <h1 className='text-2xl font-bold text-center'>Dashboard Admin</h1>
+      <UserTable />
       <Footer />
     </div>
   );
