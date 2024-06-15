@@ -127,7 +127,6 @@ const UserTable = () => {
 			if (error) {
 				throw error;
 			}
-			console.log(data);
 			setAppointments(data);
 		} catch (error) {
 			console.error("Error fetching appointments:", error.message);
@@ -159,7 +158,6 @@ const UserTable = () => {
 			if (error) {
 				throw error;
 			}
-			console.log(data);
 			setAllAppointments(data);
 		} catch (error) {
 			console.error("Error fetching appointments:", error.message);

@@ -4,7 +4,7 @@ import { Footer } from "../components";
 import UserTable from "../components/UserTable";
 import Sidebar from "../components/Sidebar";
 
-const DashboardAdmin = () => {
+const AdminPage = () => {
     return (
         <div className="h-screen flex flex-col max-h-195px">
             <NavBar message="Cerrar Sesión" />
@@ -19,4 +19,4 @@ const DashboardAdmin = () => {
     );
 };
 
-export default DashboardAdmin;
+export default AdminPage;

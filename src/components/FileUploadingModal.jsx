@@ -36,7 +36,6 @@ export default function FileUploadingModal({
 
 		try {
 			const newFileName = `${appointmentId}_${patientId}_${file.name}`;
-			console.log(newFileName);
 			const newFile = new File([file], newFileName, { type: file.type });
 
 			const { data: fileData, error: uploadError } =
@@ -48,7 +47,6 @@ export default function FileUploadingModal({
 				throw uploadError;
 			}
 
-			console.log("File uploaded successfully:", fileData);
 
 			const { data: publicUrlData } = supabase.storage
 				.from("seprice-reports")

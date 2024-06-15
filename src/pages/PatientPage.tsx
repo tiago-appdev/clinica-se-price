@@ -3,7 +3,6 @@ import NavBar from "../components/NavBar";
 import { Footer, Input } from "../components";
 import { Card, CardContent, CardHeader, CardTitle } from "../components/Card";
 import { Separator } from "../components/Separator";
-import Sidebar from "../components/Sidebar";
 import Appointment from "../types/appointment";
 import { supabase } from "../../supabase";
 import { useAuth } from "../context/AuthContext";
@@ -12,8 +11,9 @@ function PatientPage() {
 	const { isAuthenticated, userId } = useAuth();
 	const [appointments, setAppointments] = useState<Appointment[]>([]);
 	const [patientInfo, setPatientInfo] = useState<any>(null);
-    const [medicalResults, setMedicalResults] = useState<any[]>([]);
+	const [medicalResults, setMedicalResults] = useState<any[]>([]);
 
+	// Función para obtener la información del paciente
 	const fetchPatientInfo = async (userId) => {
 		try {
 			const { data: patientData, error: patientError } = await supabase
@@ -33,11 +33,15 @@ function PatientPage() {
 			setPatientInfo(patientData);
 			return patientData.patient_id;
 		} catch (error) {
-			console.error("Error al obtener los datos del paciente:", error.message);
+			console.error(
+				"Error al obtener los datos del paciente:",
+				error.message
+			);
 			throw error;
 		}
 	};
 
+	// Función para obtener los turnos del paciente
 	const fetchAppointments = async (patientId) => {
 		try {
 			const { data, error } = await supabase
@@ -50,7 +54,7 @@ function PatientPage() {
 					appointment_status,
 					doctors:appointment_doctor_id (doctor_first_name, doctor_last_name)`
 				)
-                .limit(3)
+				.limit(3) // Limitar a 3 turnos
 				.eq("appointment_patient_id", patientId)
 				.order("appointment_date, appointment_time", {
 					ascending: true,
@@ -67,16 +71,19 @@ function PatientPage() {
 		}
 	};
 
+	// Función para obtener los resultados médicos del paciente
 	const fetchMedicalResults = async (patientId) => {
 		try {
 			const { data, error } = await supabase
 				.from("medical_results")
-				.select(`
+				.select(
+					`
 					*,
 					appointments (
 						appointment_type
 					)
-				`)
+				`
+				)
 				.eq("patient_id", patientId);
 
 			if (error) {
@@ -84,7 +91,10 @@ function PatientPage() {
 			}
 			setMedicalResults(data);
 		} catch (error) {
-			console.error("Error al obtener los resultados médicos:", error.message);
+			console.error(
+				"Error al obtener los resultados médicos:",
+				error.message
+			);
 			throw error;
 		}
 	};
@@ -108,8 +118,6 @@ function PatientPage() {
 			<NavBar message="Cerrar sesión"></NavBar>
 
 			<div className="flex flex-1">
-				
-
 				<div className="flex-1 p-4 md:p-6">
 					<header className="flex h-16 items-center justify-between border-b border-gray-200 bg-gray-100 dark:border-gray-700 dark:bg-gray-800 px-4 md:px-6">
 						<div className="flex items-center gap-4">
@@ -143,58 +151,69 @@ function PatientPage() {
 								</CardHeader>
 								<CardContent>
 									<div className="grid gap-4">
-										{appointments.length > 0 ? (appointments.map(
-											(appointment, index) => {
-												const appointmentDate = new Date(appointment.appointment_date);
-												const isAppointmentCompleted = appointment.appointment_status === "Completed" || appointmentDate < new Date();
-												return (
-													<div
-														key={index}
-														className="grid gap-2"
-													>
-														<div className="flex items-center justify-between">
-															<div className="text-sm text-gray-500 dark:text-gray-400">
-																{
-																	appointment.appointment_date
-																}{" "}
-																a las{" "}
-																{
-																	appointment.appointment_time
-																}
+										{appointments.length > 0 ? (
+											appointments.map(
+												(appointment, index) => {
+													const appointmentDate =
+														new Date(
+															appointment.appointment_date
+														);
+													const isAppointmentCompleted =
+														appointment.appointment_status ===
+															"Completed" ||
+														appointmentDate <
+															new Date();
+													return (
+														<div
+															key={index}
+															className="grid gap-2"
+														>
+															<div className="flex items-center justify-between">
+																<div className="text-sm text-gray-500 dark:text-gray-400">
+																	{
+																		appointment.appointment_date
+																	}{" "}
+																	a las{" "}
+																	{
+																		appointment.appointment_time
+																	}
+																</div>
 															</div>
+															<div className="flex items-center justify-between">
+																<div>
+																	{
+																		appointment
+																			.doctors
+																			?.doctor_first_name
+																	}{" "}
+																	{
+																		appointment
+																			.doctors
+																			?.doctor_last_name
+																	}
+																</div>
+																<div
+																	className={`rounded-full px-3 py-1 text-xs font-bold ${
+																		isAppointmentCompleted
+																			? "bg-gray-900 text-green-600 dark:bg-black-900/20 dark:text-white"
+																			: "bg-gray-100 text-gray-600 dark:bg-gray-100 dark:text-gray-700"
+																	}`}
+																>
+																	{isAppointmentCompleted
+																		? "Completada"
+																		: "Pendiente"}
+																</div>
+															</div>
+															{index <
+																appointments.length -
+																	1 && (
+																<Separator />
+															)}
 														</div>
-														<div className="flex items-center justify-between">
-															<div>
-																{
-																	appointment
-																		.doctors
-																		?.doctor_first_name
-																}{" "}
-																{
-																	appointment
-																		.doctors
-																		?.doctor_last_name
-																}
-															</div>
-															<div
-																className={`rounded-full px-3 py-1 text-xs font-bold ${
-																	isAppointmentCompleted
-																		? "bg-gray-900 text-green-600 dark:bg-black-900/20 dark:text-white"
-																		: "bg-gray-100 text-gray-600 dark:bg-gray-100 dark:text-gray-700"
-																}`}
-															>
-																{
-																	isAppointmentCompleted ? "Completada" : "Pendiente"
-																}
-															</div>
-														</div>
-														{index <
-															appointments.length -
-																1 && <Separator />}
-													</div>
-												);
-											}
-										)) : (
+													);
+												}
+											)
+										) : (
 											<div className="text-gray-500 dark:text-gray-400 text-center">
 												No se encontraron turnos
 											</div>
@@ -211,7 +230,10 @@ function PatientPage() {
 										<div className="flex items-center justify-between">
 											<div>Nombre</div>
 											<div>
-												{patientInfo?.patient_first_name} {patientInfo?.patient_last_name}
+												{
+													patientInfo?.patient_first_name
+												}{" "}
+												{patientInfo?.patient_last_name}
 											</div>
 										</div>
 										<Separator />
@@ -232,7 +254,9 @@ function PatientPage() {
 										<div className="flex items-center justify-between">
 											<div>Fecha de Nacimiento</div>
 											<div>
-												{patientInfo?.patient_date_of_birth}
+												{
+													patientInfo?.patient_date_of_birth
+												}
 											</div>
 										</div>
 									</div>
@@ -245,22 +269,51 @@ function PatientPage() {
 							</CardHeader>
 							<CardContent>
 								<div className="grid gap-4">
-									{medicalResults.length > 0 ? (medicalResults.map((result, index) => (
-										<div key={index} className="grid gap-2">
-											<div className="flex items-center justify-between">
-												<div className="font-medium">Informe de {result.appointments.appointment_type}</div>
-												<div className="text-sm text-gray-500 dark:text-gray-400">{new Date(result.result_created_at).toLocaleDateString()}</div>
-											</div>
-											{result.result_type === 'text' ? (
-												<div className="text-sm text-gray-500 dark:text-gray-400">{result.result_text}</div>
-											) : (
-												<div className="text-sm text-gray-500 dark:text-gray-400">
-													<a href={result.result_file_url} className="underline" target="_blank" rel="noopener noreferrer">Ver Informe</a>
+									{medicalResults.length > 0 ? (
+										medicalResults.map((result, index) => (
+											<div
+												key={index}
+												className="grid gap-2"
+											>
+												<div className="flex items-center justify-between">
+													<div className="font-medium">
+														Informe de{" "}
+														{
+															result.appointments
+																.appointment_type
+														}
+													</div>
+													<div className="text-sm text-gray-500 dark:text-gray-400">
+														{new Date(
+															result.result_created_at
+														).toLocaleDateString()}
+													</div>
 												</div>
-											)}
-											{index < medicalResults.length - 1 && <Separator />}
-										</div>
-									))) : (
+												{result.result_type ===
+												"text" ? (
+													<div className="text-sm text-gray-500 dark:text-gray-400">
+														{result.result_text}
+													</div>
+												) : (
+													<div className="text-sm text-gray-500 dark:text-gray-400">
+														<a
+															href={
+																result.result_file_url
+															}
+															className="underline"
+															target="_blank"
+															rel="noopener noreferrer"
+														>
+															Ver Informe
+														</a>
+													</div>
+												)}
+												{index <
+													medicalResults.length -
+														1 && <Separator />}
+											</div>
+										))
+									) : (
 										<div className="text-gray-500 dark:text-gray-400 text-center">
 											No se encontraron resultados médicos
 										</div>
@@ -271,7 +324,7 @@ function PatientPage() {
 					</main>
 				</div>
 			</div>
-            <Footer />
+			<Footer />
 		</div>
 	);
 }
