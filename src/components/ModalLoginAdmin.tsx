@@ -14,7 +14,7 @@ const AdminLoginModal = ({ isOpen, onClose }) => {
   const handleLogin = async () => {
     const { data, error } = await supabase
       .from('users')
-      .select('*')
+      .select('user_id')
       .eq('username', username)
       .eq('password', password)
       .eq('role', 'admin')
@@ -23,7 +23,7 @@ const AdminLoginModal = ({ isOpen, onClose }) => {
     if (error || !data) {
       setError(true);
     } else {
-      login();
+      login(data.user_id);
       navigate('/dashboard', { state: { isAdmin: true }, replace: true });
     }
   };
