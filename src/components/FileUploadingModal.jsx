@@ -53,13 +53,24 @@ export default function FileUploadingModal({
 
 			console.log("File uploaded successfully:", fileData);
 
+			// Generate public URL for the uploaded file
+			const { data: publicUrlData } = supabase.storage
+				.from("seprice-reports")
+				.getPublicUrl(fileData.path);
+
+			if (!publicUrlData || !publicUrlData.publicUrl) {
+				throw new Error("Failed to get public URL");
+			}
+
+			const publicUrl = publicUrlData.publicUrl;
+
 			// Prepare the data to be inserted into the database
 			const fileResultData = {
 				appointment_id: appointmentId,
 				patient_id: patientId,
-				result_type: "pdf", // Assuming it's always a PDF for this example
+				result_type: fileData.fullPath.split(".").pop(), // Get the file extension
 				result_text: "", // If storing text results, update accordingly
-				result_file_url: fileData.path, // Store the URL to the file
+				result_file_url: publicUrl, // Store the URL to the file
 				result_created_at: new Date(),
 				result_updated_at: new Date(),
 			};
@@ -67,7 +78,7 @@ export default function FileUploadingModal({
 			const textResultData = {
 				appointment_id: appointmentId,
 				patient_id: patientId,
-				result_type: "text", // Assuming it's always a PDF for this example
+				result_type: "text",
 				result_text: medicalHistory, // If storing text results, update accordingly
 				result_file_url: "", // Store the URL to the file
 				result_created_at: new Date(),
@@ -109,8 +120,8 @@ export default function FileUploadingModal({
 				<DialogHeader>
 					<DialogTitle>Sube los resultados</DialogTitle>
 					<DialogDescription>
-						Sube un reporte en PDF o escribe el historial médico del
-						paciente.
+						Sube un archivo de reporte o escribe el historial médico
+						del paciente.
 					</DialogDescription>
 				</DialogHeader>
 				<div className="grid gap-4 py-4">
@@ -119,7 +130,7 @@ export default function FileUploadingModal({
 						<Input
 							id="report"
 							type="file"
-							accept=".pdf"
+							accept=".pdf,.doc,.docx,.txt,.png,.jpg,.jpeg,.gif,.bmp,.tiff,.tif,.svg,.webp,.mp4,.avi,.mov,.wmv,.flv,.mkv,.webm,.mp3,.wav,.flac,.ogg,.wma,.aac,.m4a,.opus,.zip,.rar,.7z,.tar,.gz,.tgz,.bz2,.xz,.doc,.docx,.txt,.png,.jpg,.jpeg,.gif,.bmp,.tiff,.tif,.svg,.webp,.mp4,.avi,.mov,.wmv,.flv,.mkv,.webm,.mp3,.wav,.flac,.ogg,.wma,.aac,.m4a,.opus,.zip,.rar,.7z,.tar,.gz,.tgz,.bz2,.xz"
 							onChange={handleFileChange}
 						/>
 					</div>
