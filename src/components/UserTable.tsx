@@ -337,19 +337,47 @@ const UserTable = () => {
 						appointments={appointments}
 					/>
 					<div className="space-x-2">
-						<button className="bg-blue-500 hover:bg-blue-600 text-white px-3 py-1 rounded">
+						<button className="bg-blue-500 hover:bg-blue-600 text-white px-3 py-1 rounded"
+                        onClick={() => {
+                            setTableDate(new Date());
+                        }}
+                        >
 							Hoy
 						</button>
-						<button className="bg-blue-500 hover:bg-blue-600 text-white px-3 py-1 rounded">
+						<button className="bg-blue-500 hover:bg-blue-600 text-white px-3 py-1 rounded"
+                        onClick={() => {
+                            const nextDay = new Date();
+                            nextDay.setDate(tableDate.getDate() + 7);
+                            setTableDate(nextDay);
+                        }}
+                        >
 							+7
 						</button>
-						<button className="bg-blue-500 hover:bg-blue-600 text-white px-3 py-1 rounded">
+						<button className="bg-blue-500 hover:bg-blue-600 text-white px-3 py-1 rounded"
+                        onClick={() => {
+                            const nextDay = new Date();
+                            nextDay.setDate(tableDate.getDate() + 14);
+                            setTableDate(nextDay);
+                        }}
+                        >
 							+14
 						</button>
-						<button className="bg-blue-500 hover:bg-blue-600 text-white px-3 py-1 rounded">
+						<button className="bg-blue-500 hover:bg-blue-600 text-white px-3 py-1 rounded"
+                        onClick={() => {
+                            const nextDay = new Date();
+                            nextDay.setDate(tableDate.getDate() + 21);
+                            setTableDate(nextDay);
+                        }}
+                        >
 							+21
 						</button>
-						<button className="bg-blue-500 hover:bg-blue-600 text-white px-3 py-1 rounded">
+						<button className="bg-blue-500 hover:bg-blue-600 text-white px-3 py-1 rounded"
+                        onClick={() => {
+                            const nextDay = new Date();
+                            nextDay.setDate(tableDate.getDate() + 28);
+                            setTableDate(nextDay);
+                        }}
+                        >
 							+28
 						</button>
 					</div>
