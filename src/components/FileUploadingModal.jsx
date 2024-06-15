@@ -35,13 +35,9 @@ export default function FileUploadingModal({
 		if (!file || !appointmentId || !patientId) return;
 
 		try {
-			// Generate the new filename
 			const newFileName = `${appointmentId}_${patientId}_${file.name}`;
-			console.log(newFileName);
-			// Create a new File object with the new filename
 			const newFile = new File([file], newFileName, { type: file.type });
 
-			// Step 1: Upload file to Supabase Storage
 			const { data: fileData, error: uploadError } =
 				await supabase.storage
 					.from("seprice-reports")
@@ -51,9 +47,7 @@ export default function FileUploadingModal({
 				throw uploadError;
 			}
 
-			console.log("File uploaded successfully:", fileData);
 
-			// Generate public URL for the uploaded file
 			const { data: publicUrlData } = supabase.storage
 				.from("seprice-reports")
 				.getPublicUrl(fileData.path);
@@ -64,13 +58,12 @@ export default function FileUploadingModal({
 
 			const publicUrl = publicUrlData.publicUrl;
 
-			// Prepare the data to be inserted into the database
 			const fileResultData = {
 				appointment_id: appointmentId,
 				patient_id: patientId,
-				result_type: fileData.fullPath.split(".").pop(), // Get the file extension
-				result_text: "", // If storing text results, update accordingly
-				result_file_url: publicUrl, // Store the URL to the file
+				result_type: fileData.fullPath.split(".").pop(), 
+				result_text: "", 
+				result_file_url: publicUrl, 
 				result_created_at: new Date(),
 				result_updated_at: new Date(),
 			};
@@ -79,13 +72,12 @@ export default function FileUploadingModal({
 				appointment_id: appointmentId,
 				patient_id: patientId,
 				result_type: "text",
-				result_text: medicalHistory, // If storing text results, update accordingly
-				result_file_url: "", // Store the URL to the file
+				result_text: medicalHistory, 
+				result_file_url: "", 
 				result_created_at: new Date(),
 				result_updated_at: new Date(),
 			};
 
-			// Insert the file result data into the database
 			const { error: fileInsertError } = await supabase
 				.from("medical_results")
 				.insert(fileResultData);
@@ -94,7 +86,6 @@ export default function FileUploadingModal({
 				throw fileInsertError;
 			}
 
-			// Insert the text result data into the database if medicalHistory exists
 			if (medicalHistory) {
 				const { error: textInsertError } = await supabase
 					.from("medical_results")

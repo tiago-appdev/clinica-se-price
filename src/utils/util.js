@@ -1,4 +1,3 @@
-// Function to generate time options
 export function generateTimeOptions() {
 	const times = [];
 	for (let hour = 8; hour < 19; hour++) {
@@ -13,19 +12,14 @@ export function generateTimeOptions() {
 }
 
 export function formatDate(date) {
-	// Get the day of the week in Spanish
 	const dayOfWeek = date.toLocaleDateString("es-AR", { weekday: "long" });
 
-	// Get the day of the month with leading zero
 	const day = String(date.getDate()).padStart(2, "0");
 
-	// Get the month with leading zero
-	const month = String(date.getMonth() + 1).padStart(2, "0"); // Months are 0-based
+	const month = String(date.getMonth() + 1).padStart(2, "0"); 
 
-	// Get the full year
 	const year = date.getFullYear();
 
-	// Combine parts into desired format
 	return `${capitalize(dayOfWeek)} ${day}/${month}/${year}`;
 }
 
@@ -40,7 +34,6 @@ export function calculateAge(birthDate) {
 	let age = today.getFullYear() - dob.getFullYear();
 	const monthDiff = today.getMonth() - dob.getMonth();
 
-	// If the birth month is ahead of the current month, reduce age by 1
 	if (monthDiff < 0 || (monthDiff === 0 && today.getDate() < dob.getDate())) {
 		age--;
 	}

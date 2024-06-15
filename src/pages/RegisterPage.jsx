@@ -31,7 +31,6 @@ const RegisterPage = () => {
     e.preventDefault();
 
     try {
-      // Insertar en la tabla users
       const { data: userData, error: userError } = await supabase
         .from('users')
         .insert([
@@ -55,9 +54,7 @@ const RegisterPage = () => {
 
       const user_id = userData[0].user_id;
 
-      // Insertar en la tabla patients
-      // eslint-disable-next-line no-unused-vars
-      const { data: patientData, error: patientError } = await supabase
+      const { error: patientError } = await supabase
         .from('patients')
         .insert([
           {
