@@ -1,4 +1,3 @@
-// src/App.jsx
 import { Route, Routes } from 'react-router-dom';
 import Home from './pages/Home';
 import DashboardAdmin from './pages/DashboardAdmin';

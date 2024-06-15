@@ -172,7 +172,7 @@ export default function Home() {
 		e.preventDefault();
 		saveAppointment();
 		handleModalClose();
-		alert("Cita reservada con exito");
+		alert("Turno reservada con exito");
 	};
 
 	const saveAppointment = async () => {

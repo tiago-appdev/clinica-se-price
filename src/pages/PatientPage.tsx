@@ -63,7 +63,7 @@ function PatientPage() {
 			}
 			setAppointments(data);
 		} catch (error) {
-			console.error("Error al obtener las citas:", error.message);
+			console.error("Error al obtener los turnos:", error.message);
 			throw error;
 		}
 	};

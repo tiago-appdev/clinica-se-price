@@ -300,7 +300,6 @@ const UserTable = () => {
 						/>
 					</button>
 					<button
-						onClick={() => setIsModalOpen(true)}
 						className="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded"
 					>
 						{formatDate(tableDate)}
@@ -384,9 +383,11 @@ const UserTable = () => {
 				</div>
 				<div className="flex justify-between items-center w-full mb-4">
 					<div className="space-x-4">
-						<div className="text-gray-700 bg-white border px-4 py-2 rounded">
-							Turnos Médicos
-						</div>
+						<button className="text-gray-700 bg-white border px-4 py-2 rounded"
+                        onClick={() => setIsModalOpen(true)}
+                        >
+							Agendar Turno
+						</button>
 					</div>
 					<button className="text-gray-700 bg-white border border-gray-300 px-4 py-2 rounded">
 						Imprimir Horario
