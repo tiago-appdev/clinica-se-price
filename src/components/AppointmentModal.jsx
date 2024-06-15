@@ -52,7 +52,7 @@ const AppointmentModal = ({
             }`}
             onClick={() => setActiveTab('mis-turnos')}
           >
-            Mis Turnos
+            Sus Turnos
           </button>
         </DialogHeader>
         {activeTab === 'reservar' ? (
@@ -167,7 +167,7 @@ const AppointmentModal = ({
             <DialogFooter>
               <button
                 type='submit'
-                className='inline-flex h-10 items-center justify-center rounded-md bg-green-700 px-8 text-sm font-medium text-white shadow transition-colors hover:bg-gray-800 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-gray-700 disabled:pointer-events-none disabled:opacity-50'
+                className='inline-flex h-10 items-center justify-center rounded-md bg-gray-900 px-8 text-sm font-medium text-white shadow transition-colors hover:bg-gray-800 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-gray-700 disabled:pointer-events-none disabled:opacity-50'
               >
                 Confirmar Turno
               </button>

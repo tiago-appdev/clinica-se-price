@@ -1,10 +1,14 @@
 /* eslint-disable no-unused-vars */
 import { useEffect, useState } from "react";
 import AppointmentModal from "./AppointmentModal";
+import FileUploadingModal from "./FileUploadingModal";
 import { supabase } from "../../supabase";
 import { calculateAge, formatDate, generateTimeOptions } from "../utils/util";
 import Appointment from "../types/appointment";
 import React from "react";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { faArrowAltCircleRight } from "@fortawesome/free-solid-svg-icons";
+import { faArrowAltCircleLeft } from "@fortawesome/free-solid-svg-icons";
 
 const UserTable = () => {
 	const [isEditModalOpen, setIsEditModalOpen] = useState(false);
@@ -17,6 +21,7 @@ const UserTable = () => {
 	const [professionals, setProfessionals] = useState<any[]>([]);
 	const [professional, setProfessional] = useState("");
 	const [date, setDate] = useState(new Date());
+	const [tableDate, setTableDate] = useState(new Date());
 	const [time, setTime] = useState("08:00");
 	const [availableTimes, setAvailableTimes] = useState<string[]>(
 		generateTimeOptions()
@@ -24,6 +29,9 @@ const UserTable = () => {
 
 	const [appointments, setAppointments] = useState<Appointment[]>([]);
 	const [allAppointments, setAllAppointments] = useState<Appointment[]>([]);
+	const [isFileUploadModalOpen, setIsFileUploadModalOpen] = useState(false);
+	const [selectedAppointment, setSelectedAppointment] =
+		useState<Appointment | null>(null);
 
 	// Function to fetch professionals from Supabase
 	const fetchProfessionals = async () => {
@@ -38,10 +46,20 @@ const UserTable = () => {
 		}
 	};
 
+	const handleOpenModal = (appointment) => {
+		setSelectedAppointment(appointment);
+		setIsFileUploadModalOpen(true);
+	};
+
 	// Fetch professionals on component mount
 	useEffect(() => {
 		fetchProfessionals();
 	}, []);
+
+	// Fetch professionals on component mount
+	useEffect(() => {
+		fetchAllPatientAppointments();
+	}, [tableDate]);
 	// Fetch appointments for the selected professional and date to get booked times
 	const fetchDoctorAppointments = async () => {
 		try {
@@ -126,7 +144,7 @@ const UserTable = () => {
 			let query = supabase
 				.from("appointments")
 				.select(
-					`appointment_time, 
+					`appointment_id, appointment_time, 
                              appointment_date, 
                              appointment_doctor_id, 
                              appointment_type,
@@ -135,7 +153,7 @@ const UserTable = () => {
                              doctors:appointment_doctor_id (doctor_first_name, doctor_last_name),
                              patients:appointment_patient_id (patient_id, patient_date_of_birth, patient_first_name, patient_last_name)`
 				)
-				.eq("appointment_date", date.toISOString().split("T")[0]);
+				.eq("appointment_date", tableDate.toISOString().split("T")[0]);
 
 			const { data, error } = await query
 				.returns<Appointment[]>()
@@ -236,6 +254,17 @@ const UserTable = () => {
 		}
 	};
 
+	const handleNextDay = () => {
+		const nextDay = new Date(tableDate);
+		nextDay.setDate(tableDate.getDate() + 1);
+		setTableDate(nextDay);
+	};
+    const handlePreviousDay = () => {
+		const nextDay = new Date(tableDate);
+		nextDay.setDate(tableDate.getDate() - 1);
+		setTableDate(nextDay);
+	};
+
 	const handleProfessionalChange = (e: {
 		target: { value: React.SetStateAction<string> };
 	}) => {
@@ -257,21 +286,33 @@ const UserTable = () => {
 	};
 
 	return (
-		<div
-			className="flex flex-col items-center"
-			style={{ height: "calc(100vh - 96px)" }}
-		>
-			<div
-				className="flex flex-col items-center w-11/12 mt-2"
-				style={{ height: "calc(100vh - 110px)" }}
-			>
+		<div className="flex flex-col items-center">
+			<div className="flex flex-col items-center w-11/12 mt-2">
 				<div className="flex justify-between items-center w-full mb-4">
 					<h2 className="text-2xl font-bold"></h2>
+					<button
+						onClick={handlePreviousDay}
+						className="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded flex items-center"
+					>
+						<FontAwesomeIcon
+							icon={faArrowAltCircleLeft}
+							className="mr-2"
+						/>
+					</button>
 					<button
 						onClick={() => setIsModalOpen(true)}
 						className="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded"
 					>
-						{formatDate(date)}
+						{formatDate(tableDate)}
+					</button>
+					<button
+						onClick={handleNextDay}
+						className="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded flex items-center"
+					>
+						<FontAwesomeIcon
+							icon={faArrowAltCircleRight}
+							className="mr-2"
+						/>
 					</button>
 
 					<AppointmentModal
@@ -296,19 +337,47 @@ const UserTable = () => {
 						appointments={appointments}
 					/>
 					<div className="space-x-2">
-						<button className="bg-blue-500 hover:bg-blue-600 text-white px-3 py-1 rounded">
+						<button className="bg-blue-500 hover:bg-blue-600 text-white px-3 py-1 rounded"
+                        onClick={() => {
+                            setTableDate(new Date());
+                        }}
+                        >
 							Hoy
 						</button>
-						<button className="bg-blue-500 hover:bg-blue-600 text-white px-3 py-1 rounded">
+						<button className="bg-blue-500 hover:bg-blue-600 text-white px-3 py-1 rounded"
+                        onClick={() => {
+                            const nextDay = new Date();
+                            nextDay.setDate(tableDate.getDate() + 7);
+                            setTableDate(nextDay);
+                        }}
+                        >
 							+7
 						</button>
-						<button className="bg-blue-500 hover:bg-blue-600 text-white px-3 py-1 rounded">
+						<button className="bg-blue-500 hover:bg-blue-600 text-white px-3 py-1 rounded"
+                        onClick={() => {
+                            const nextDay = new Date();
+                            nextDay.setDate(tableDate.getDate() + 14);
+                            setTableDate(nextDay);
+                        }}
+                        >
 							+14
 						</button>
-						<button className="bg-blue-500 hover:bg-blue-600 text-white px-3 py-1 rounded">
+						<button className="bg-blue-500 hover:bg-blue-600 text-white px-3 py-1 rounded"
+                        onClick={() => {
+                            const nextDay = new Date();
+                            nextDay.setDate(tableDate.getDate() + 21);
+                            setTableDate(nextDay);
+                        }}
+                        >
 							+21
 						</button>
-						<button className="bg-blue-500 hover:bg-blue-600 text-white px-3 py-1 rounded">
+						<button className="bg-blue-500 hover:bg-blue-600 text-white px-3 py-1 rounded"
+                        onClick={() => {
+                            const nextDay = new Date();
+                            nextDay.setDate(tableDate.getDate() + 28);
+                            setTableDate(nextDay);
+                        }}
+                        >
 							+28
 						</button>
 					</div>
@@ -323,7 +392,7 @@ const UserTable = () => {
 						Imprimir Horario
 					</button>
 				</div>
-				<div className="w-full h-full overflow-y-auto">
+				<div className="w-full overflow-y-auto">
 					<table className="w-full text-left border-collapse">
 						<thead className="bg-gray-200 sticky top-0">
 							<tr>
@@ -338,77 +407,75 @@ const UserTable = () => {
 							</tr>
 						</thead>
 						<tbody>
-							{allAppointments.map((appointment, index) => {
-								return (
-									<tr key={index} className="border-b">
-										<td className="px-4 py-2">
-											{appointment.appointment_time}
-										</td>
-										<td className="px-4 py-2">
-											{appointment.patients.patient_id}
-										</td>
-										<td className="px-4 py-2">
-											{
-												appointment.patients
-													.patient_first_name
-											}{" "}
-											{
-												appointment.patients
-													.patient_last_name
-											}
-										</td>
-										<td className="px-4 py-2">
-											{calculateAge(appointment.patients.patient_date_of_birth)}
-										</td>
-										<td className="px-4 py-2">
-											{appointment.appointment_type}
-										</td>
-										<td className="px-4 py-2">
-											{
-												appointment.doctors
-													.doctor_first_name
-											}{" "}
-											{
-												appointment.doctors
-													.doctor_last_name
-											}
-										</td>
-										<td className="px-4 py-2">
-											<button
-												className={`px-4 py-2 rounded ${
-													appointment.appointment_status ===
-													"Pending"
-														? "bg-red-500 text-white"
-														: "bg-green-500 text-white"
-												}`}
-											>
-												{appointment.appointment_status ===
+							{allAppointments.map((appointment) => (
+								<tr
+									key={appointment.appointment_id}
+									className="border-b cursor-pointer"
+									onClick={handleOpenModal.bind(
+										this,
+										appointment
+									)}
+								>
+									<td className="px-4 py-2">
+										{appointment.appointment_time}
+									</td>
+									<td className="px-4 py-2">
+										{appointment.patients.patient_id}
+									</td>
+									<td className="px-4 py-2">{`${appointment.patients.patient_first_name} ${appointment.patients.patient_last_name}`}</td>
+									<td className="px-4 py-2">
+										{calculateAge(
+											appointment.patients
+												.patient_date_of_birth
+										)}
+									</td>
+									<td className="px-4 py-2">
+										{appointment.appointment_type}
+									</td>
+									<td className="px-4 py-2">{`${appointment.doctors.doctor_first_name} ${appointment.doctors.doctor_last_name}`}</td>
+									<td className="px-4 py-2">
+										<button
+											className={`px-4 py-2 rounded ${
+												appointment.appointment_status ===
 												"Pending"
-													? "Pendiente"
-													: "Realizado"}
-											</button>
-										</td>
-
-										<td className="px-4 py-2">
-											<button
-												className={`px-4 py-2 rounded ${
-													appointment.appointment_payment_status
-														? "bg-green-500 text-white"
-														: "bg-red-500 text-white"
-												}`}
-											>
-												{appointment.appointment_payment_status
-													? "Pagado"
-													: "Pendiente"}
-											</button>
-										</td>
-									</tr>
-								);
-							})}
+													? "bg-red-500 text-white"
+													: "bg-green-500 text-white"
+											}`}
+										>
+											{appointment.appointment_status ===
+											"Pending"
+												? "Pendiente"
+												: "Realizado"}
+										</button>
+									</td>
+									<td className="px-4 py-2">
+										<button
+											className={`px-4 py-2 rounded ${
+												appointment.appointment_payment_status
+													? "bg-green-500 text-white"
+													: "bg-red-500 text-white"
+											}`}
+										>
+											{appointment.appointment_payment_status
+												? "Pagado"
+												: "Pendiente"}
+										</button>
+									</td>
+								</tr>
+							))}
 						</tbody>
 					</table>
+					{selectedAppointment && (
+						<FileUploadingModal
+							isOpen={isFileUploadModalOpen}
+							onOpenChange={setIsFileUploadModalOpen}
+							appointmentId={selectedAppointment.appointment_id}
+							patientId={selectedAppointment.patients.patient_id}
+						/>
+					)}
 				</div>
 			</div>
+
 			{isEditModalOpen && (
 				<div className="fixed inset-0 flex items-center justify-center z-50">
 					<div className="relative bg-white rounded-lg shadow dark:bg-gray-700">

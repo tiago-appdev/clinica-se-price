@@ -3,6 +3,7 @@ import NavBar from "../components/NavBar";
 import { Footer, Input } from "../components";
 import { Card, CardContent, CardHeader, CardTitle } from "../components/Card";
 import { Separator } from "../components/Separator";
+import Sidebar from "../components/Sidebar";
 import Appointment from "../types/appointment";
 import { supabase } from "../../supabase";
 import { useAuth } from "../context/AuthContext";
@@ -50,6 +51,7 @@ function PatientPage() {
 					appointment_status,
 					doctors:appointment_doctor_id (doctor_first_name, doctor_last_name)`
 				)
+                .limit(3)
 				.eq("appointment_patient_id", patientId)
 				.order("appointment_date, appointment_time", {
 					ascending: true,
@@ -109,38 +111,7 @@ function PatientPage() {
 			<NavBar message="Cerrar sesión"></NavBar>
 
 			<div className="flex flex-1">
-				<nav className="w-64 bg-gray-100 dark:bg-gray-900 flex flex-col gap-1 p-4">
-					<a
-						href="#"
-						className="flex items-center gap-3 rounded-lg px-3 py-2 text-gray-900 bg-gray-200 dark:bg-gray-800 dark:text-gray-50 transition-all"
-					>
-						Panel de Control
-					</a>
-					<a
-						href="#"
-						className="flex items-center gap-3 rounded-lg px-3 py-2 text-gray-500 dark:text-gray-400 transition-all hover:text-gray-900 dark:hover:text-gray-50"
-					>
-						Turnos
-					</a>
-					<a
-						href="#"
-						className="flex items-center gap-3 rounded-lg px-3 py-2 text-gray-500 dark:text-gray-400 transition-all hover:text-gray-900 dark:hover:text-gray-50"
-					>
-						Perfil
-					</a>
-					<a
-						href="#"
-						className="flex items-center gap-3 rounded-lg px-3 py-2 text-gray-500 dark:text-gray-400 transition-all hover:text-gray-900 dark:hover:text-gray-50"
-					>
-						Historias Médicas
-					</a>
-					<a
-						href="#"
-						className="flex items-center gap-3 rounded-lg px-3 py-2 text-gray-500 dark:text-gray-400 transition-all hover:text-gray-900 dark:hover:text-gray-50"
-					>
-						Ajustes
-					</a>
-				</nav>
+				
 
 				<div className="flex-1 p-4 md:p-6">
 					<header className="flex h-16 items-center justify-between border-b border-gray-200 bg-gray-100 dark:border-gray-700 dark:bg-gray-800 px-4 md:px-6">
