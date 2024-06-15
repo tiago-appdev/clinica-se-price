@@ -19,7 +19,7 @@ const ModalPatients = ({ isOpen, onClose }) => {
       .eq('username', username)
       .eq('password', password)
       .eq('role', 'patient')
-      .single();
+      .maybeSingle();
 
     if (error || !data) {
       setError(true);
