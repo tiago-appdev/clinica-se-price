@@ -6,8 +6,9 @@ import { supabase } from "../../supabase";
 import { calculateAge, formatDate, generateTimeOptions } from "../utils/util";
 import Appointment from "../types/appointment";
 import React from "react";
-import Sidebar from '../components/Sidebar';
-
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { faArrowAltCircleRight } from "@fortawesome/free-solid-svg-icons";
+import { faArrowAltCircleLeft } from "@fortawesome/free-solid-svg-icons";
 
 const UserTable = () => {
 	const [isEditModalOpen, setIsEditModalOpen] = useState(false);
@@ -20,6 +21,7 @@ const UserTable = () => {
 	const [professionals, setProfessionals] = useState<any[]>([]);
 	const [professional, setProfessional] = useState("");
 	const [date, setDate] = useState(new Date());
+	const [tableDate, setTableDate] = useState(new Date());
 	const [time, setTime] = useState("08:00");
 	const [availableTimes, setAvailableTimes] = useState<string[]>(
 		generateTimeOptions()
@@ -28,7 +30,8 @@ const UserTable = () => {
 	const [appointments, setAppointments] = useState<Appointment[]>([]);
 	const [allAppointments, setAllAppointments] = useState<Appointment[]>([]);
 	const [isFileUploadModalOpen, setIsFileUploadModalOpen] = useState(false);
-	const [selectedAppointment, setSelectedAppointment] = useState<Appointment | null>( null)
+	const [selectedAppointment, setSelectedAppointment] =
+		useState<Appointment | null>(null);
 
 	// Function to fetch professionals from Supabase
 	const fetchProfessionals = async () => {
@@ -44,7 +47,6 @@ const UserTable = () => {
 	};
 
 	const handleOpenModal = (appointment) => {
-        console.log(appointment)
 		setSelectedAppointment(appointment);
 		setIsFileUploadModalOpen(true);
 	};
@@ -53,6 +55,11 @@ const UserTable = () => {
 	useEffect(() => {
 		fetchProfessionals();
 	}, []);
+
+	// Fetch professionals on component mount
+	useEffect(() => {
+		fetchAllPatientAppointments();
+	}, [tableDate]);
 	// Fetch appointments for the selected professional and date to get booked times
 	const fetchDoctorAppointments = async () => {
 		try {
@@ -146,7 +153,7 @@ const UserTable = () => {
                              doctors:appointment_doctor_id (doctor_first_name, doctor_last_name),
                              patients:appointment_patient_id (patient_id, patient_date_of_birth, patient_first_name, patient_last_name)`
 				)
-				.eq("appointment_date", date.toISOString().split("T")[0]);
+				.eq("appointment_date", tableDate.toISOString().split("T")[0]);
 
 			const { data, error } = await query
 				.returns<Appointment[]>()
@@ -247,6 +254,17 @@ const UserTable = () => {
 		}
 	};
 
+	const handleNextDay = () => {
+		const nextDay = new Date(tableDate);
+		nextDay.setDate(tableDate.getDate() + 1);
+		setTableDate(nextDay);
+	};
+    const handlePreviousDay = () => {
+		const nextDay = new Date(tableDate);
+		nextDay.setDate(tableDate.getDate() - 1);
+		setTableDate(nextDay);
+	};
+
 	const handleProfessionalChange = (e: {
 		target: { value: React.SetStateAction<string> };
 	}) => {
@@ -268,20 +286,33 @@ const UserTable = () => {
 	};
 
 	return (
-        
-        <div
-        className="flex flex-col items-center"
-		>
-			<div
-				className="flex flex-col items-center w-11/12 mt-2"
-			>
+		<div className="flex flex-col items-center">
+			<div className="flex flex-col items-center w-11/12 mt-2">
 				<div className="flex justify-between items-center w-full mb-4">
 					<h2 className="text-2xl font-bold"></h2>
+					<button
+						onClick={handlePreviousDay}
+						className="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded flex items-center"
+					>
+						<FontAwesomeIcon
+							icon={faArrowAltCircleLeft}
+							className="mr-2"
+						/>
+					</button>
 					<button
 						onClick={() => setIsModalOpen(true)}
 						className="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded"
 					>
-						{formatDate(date)}
+						{formatDate(tableDate)}
+					</button>
+					<button
+						onClick={handleNextDay}
+						className="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded flex items-center"
+					>
+						<FontAwesomeIcon
+							icon={faArrowAltCircleRight}
+							className="mr-2"
+						/>
 					</button>
 
 					<AppointmentModal
@@ -352,7 +383,10 @@ const UserTable = () => {
 								<tr
 									key={appointment.appointment_id}
 									className="border-b cursor-pointer"
-									onClick={handleOpenModal.bind(this, appointment)}
+									onClick={handleOpenModal.bind(
+										this,
+										appointment
+									)}
 								>
 									<td className="px-4 py-2">
 										{appointment.appointment_time}
@@ -407,9 +441,7 @@ const UserTable = () => {
 						<FileUploadingModal
 							isOpen={isFileUploadModalOpen}
 							onOpenChange={setIsFileUploadModalOpen}
-							appointmentId={
-								selectedAppointment.appointment_id
-							}
+							appointmentId={selectedAppointment.appointment_id}
 							patientId={selectedAppointment.patients.patient_id}
 						/>
 					)}

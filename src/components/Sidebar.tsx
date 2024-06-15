@@ -10,28 +10,10 @@ const Sidebar = () => {
                 Panel de Control
             </a>
             <a
-                href="#"
+                href="#liquidaciones"
                 className="flex items-center gap-3 rounded-lg px-3 py-2 text-gray-500 dark:text-gray-400 transition-all hover:text-gray-900 dark:hover:text-gray-50"
             >
-                Turnos
-            </a>
-            <a
-                href="#"
-                className="flex items-center gap-3 rounded-lg px-3 py-2 text-gray-500 dark:text-gray-400 transition-all hover:text-gray-900 dark:hover:text-gray-50"
-            >
-                Perfil
-            </a>
-            <a
-                href="#"
-                className="flex items-center gap-3 rounded-lg px-3 py-2 text-gray-500 dark:text-gray-400 transition-all hover:text-gray-900 dark:hover:text-gray-50"
-            >
-                Historias Médicas
-            </a>
-            <a
-                href="#"
-                className="flex items-center gap-3 rounded-lg px-3 py-2 text-gray-500 dark:text-gray-400 transition-all hover:text-gray-900 dark:hover:text-gray-50"
-            >
-                Ajustes
+                Liquidaciones
             </a>
         </nav>
     );

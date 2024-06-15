@@ -52,7 +52,7 @@ const AppointmentModal = ({
             }`}
             onClick={() => setActiveTab('mis-turnos')}
           >
-            Mis Turnos
+            Sus Turnos
           </button>
         </DialogHeader>
         {activeTab === 'reservar' ? (
