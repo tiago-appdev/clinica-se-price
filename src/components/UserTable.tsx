@@ -356,9 +356,9 @@ const UserTable = () => {
 							className="mr-2"
 						/>
 					</button>
-					<button className="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded">
+					<span className="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded">
 						{formatDate(tableDate)}
-					</button>
+					</span>
 					<button
 						onClick={handleNextDay}
 						className="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded flex items-center"
