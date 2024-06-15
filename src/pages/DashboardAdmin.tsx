@@ -6,7 +6,7 @@ import UserTable from '../components/UserTable';
 const DashboardAdmin = () => {
   return (
     <div className='h-screen w-full'>
-      <NavBar message='Logout' />
+      <NavBar message='Cerrar Sesión' />
       <UserTable />
       <Footer />
     </div>
