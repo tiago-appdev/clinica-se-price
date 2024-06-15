@@ -1,6 +1,7 @@
 /* eslint-disable no-unused-vars */
 import { useEffect, useState } from "react";
 import AppointmentModal from "./AppointmentModal";
+import FileUploadingModal from "./FileUploadingModal";
 import { supabase } from "../../supabase";
 import { calculateAge, formatDate, generateTimeOptions } from "../utils/util";
 import Appointment from "../types/appointment";
@@ -24,6 +25,8 @@ const UserTable = () => {
 
 	const [appointments, setAppointments] = useState<Appointment[]>([]);
 	const [allAppointments, setAllAppointments] = useState<Appointment[]>([]);
+	const [isFileUploadModalOpen, setIsFileUploadModalOpen] = useState(false);
+	const [selectedAppointment, setSelectedAppointment] = useState<Appointment | null>( null)
 
 	// Function to fetch professionals from Supabase
 	const fetchProfessionals = async () => {
@@ -36,6 +39,12 @@ const UserTable = () => {
 		} catch (error) {
 			console.error("Error fetching professionals:", error.message);
 		}
+	};
+
+	const handleOpenModal = (appointment) => {
+        console.log(appointment)
+		setSelectedAppointment(appointment);
+		setIsFileUploadModalOpen(true);
 	};
 
 	// Fetch professionals on component mount
@@ -126,7 +135,7 @@ const UserTable = () => {
 			let query = supabase
 				.from("appointments")
 				.select(
-					`appointment_time, 
+					`appointment_id, appointment_time, 
                              appointment_date, 
                              appointment_doctor_id, 
                              appointment_type,
@@ -338,77 +347,74 @@ const UserTable = () => {
 							</tr>
 						</thead>
 						<tbody>
-							{allAppointments.map((appointment, index) => {
-								return (
-									<tr key={index} className="border-b">
-										<td className="px-4 py-2">
-											{appointment.appointment_time}
-										</td>
-										<td className="px-4 py-2">
-											{appointment.patients.patient_id}
-										</td>
-										<td className="px-4 py-2">
-											{
-												appointment.patients
-													.patient_first_name
-											}{" "}
-											{
-												appointment.patients
-													.patient_last_name
-											}
-										</td>
-										<td className="px-4 py-2">
-											{calculateAge(appointment.patients.patient_date_of_birth)}
-										</td>
-										<td className="px-4 py-2">
-											{appointment.appointment_type}
-										</td>
-										<td className="px-4 py-2">
-											{
-												appointment.doctors
-													.doctor_first_name
-											}{" "}
-											{
-												appointment.doctors
-													.doctor_last_name
-											}
-										</td>
-										<td className="px-4 py-2">
-											<button
-												className={`px-4 py-2 rounded ${
-													appointment.appointment_status ===
-													"Pending"
-														? "bg-red-500 text-white"
-														: "bg-green-500 text-white"
-												}`}
-											>
-												{appointment.appointment_status ===
+							{allAppointments.map((appointment) => (
+								<tr
+									key={appointment.appointment_id}
+									className="border-b cursor-pointer"
+									onClick={handleOpenModal.bind(this, appointment)}
+								>
+									<td className="px-4 py-2">
+										{appointment.appointment_time}
+									</td>
+									<td className="px-4 py-2">
+										{appointment.patients.patient_id}
+									</td>
+									<td className="px-4 py-2">{`${appointment.patients.patient_first_name} ${appointment.patients.patient_last_name}`}</td>
+									<td className="px-4 py-2">
+										{calculateAge(
+											appointment.patients
+												.patient_date_of_birth
+										)}
+									</td>
+									<td className="px-4 py-2">
+										{appointment.appointment_type}
+									</td>
+									<td className="px-4 py-2">{`${appointment.doctors.doctor_first_name} ${appointment.doctors.doctor_last_name}`}</td>
+									<td className="px-4 py-2">
+										<button
+											className={`px-4 py-2 rounded ${
+												appointment.appointment_status ===
 												"Pending"
-													? "Pendiente"
-													: "Realizado"}
-											</button>
-										</td>
-
-										<td className="px-4 py-2">
-											<button
-												className={`px-4 py-2 rounded ${
-													appointment.appointment_payment_status
-														? "bg-green-500 text-white"
-														: "bg-red-500 text-white"
-												}`}
-											>
-												{appointment.appointment_payment_status
-													? "Pagado"
-													: "Pendiente"}
-											</button>
-										</td>
-									</tr>
-								);
-							})}
+													? "bg-red-500 text-white"
+													: "bg-green-500 text-white"
+											}`}
+										>
+											{appointment.appointment_status ===
+											"Pending"
+												? "Pendiente"
+												: "Realizado"}
+										</button>
+									</td>
+									<td className="px-4 py-2">
+										<button
+											className={`px-4 py-2 rounded ${
+												appointment.appointment_payment_status
+													? "bg-green-500 text-white"
+													: "bg-red-500 text-white"
+											}`}
+										>
+											{appointment.appointment_payment_status
+												? "Pagado"
+												: "Pendiente"}
+										</button>
+									</td>
+								</tr>
+							))}
 						</tbody>
 					</table>
+					{selectedAppointment && (
+						<FileUploadingModal
+							isOpen={isFileUploadModalOpen}
+							onOpenChange={setIsFileUploadModalOpen}
+							appointmentId={
+								selectedAppointment.appointment_id
+							}
+							patientId={selectedAppointment.patients.patient_id}
+						/>
+					)}
 				</div>
 			</div>
+
 			{isEditModalOpen && (
 				<div className="fixed inset-0 flex items-center justify-center z-50">
 					<div className="relative bg-white rounded-lg shadow dark:bg-gray-700">

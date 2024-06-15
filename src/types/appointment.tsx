@@ -1,4 +1,5 @@
 interface Appointment {
+    appointment_id: string;
     appointment_time: string;
     appointment_date: string;
     appointment_doctor_id: string;
