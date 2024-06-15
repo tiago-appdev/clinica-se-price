@@ -16,7 +16,7 @@
 
 .card-title {
     font-size: 1.25em;
-    font-weight: bold !important; /* Use !important to override Tailwind */
+    font-weight: bold;
     margin: 0;
 }
 
