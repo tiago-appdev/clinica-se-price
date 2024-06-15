@@ -4,6 +4,8 @@ import Home from './pages/Home';
 import DashboardAdmin from './pages/DashboardAdmin';
 import { AuthProvider } from './context/AuthContext';
 import ProtectedRoute from './components/ProtectedRoute';
+import RegisterPage from './pages/RegisterPage';
+import PatientPage from './pages/PatientPage';
 
 function App() {
   return (
@@ -21,6 +23,23 @@ function App() {
                 <DashboardAdmin />
               </ProtectedRoute>
             }
+          />
+          <Route
+            path='/register'
+            element={<RegisterPage />}
+          />
+
+          <Route
+            path='/patient'
+            element={
+              <ProtectedRoute>
+                <PatientPage />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path='*'
+            element={<Home />}
           />
         </Routes>
       </AuthProvider>
