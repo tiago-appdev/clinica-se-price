@@ -16,6 +16,7 @@ function PatientPage() {
 	// Función para obtener la información del paciente
 	const fetchPatientInfo = async (userId) => {
 		try {
+            console.log(userId)
 			const { data: patientData, error: patientError } = await supabase
 				.from("patients")
 				.select("*")

@@ -187,7 +187,7 @@ export default function Home() {
 				throw patientError;
 			}
 
-			const { error } = await supabase.from("appointments").insert([
+			const { data, error } = await supabase.from("appointments").insert([
 				{
 					appointment_patient_id: patientData.patient_id,
 					appointment_doctor_id: professional,
