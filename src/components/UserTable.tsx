@@ -6,6 +6,8 @@ import { supabase } from "../../supabase";
 import { calculateAge, formatDate, generateTimeOptions } from "../utils/util";
 import Appointment from "../types/appointment";
 import React from "react";
+import Sidebar from '../components/Sidebar';
+
 
 const UserTable = () => {
 	const [isEditModalOpen, setIsEditModalOpen] = useState(false);
@@ -266,13 +268,12 @@ const UserTable = () => {
 	};
 
 	return (
-		<div
-			className="flex flex-col items-center"
-			style={{ height: "calc(100vh - 96px)" }}
+        
+        <div
+        className="flex flex-col items-center"
 		>
 			<div
 				className="flex flex-col items-center w-11/12 mt-2"
-				style={{ height: "calc(100vh - 110px)" }}
 			>
 				<div className="flex justify-between items-center w-full mb-4">
 					<h2 className="text-2xl font-bold"></h2>
@@ -332,7 +333,7 @@ const UserTable = () => {
 						Imprimir Horario
 					</button>
 				</div>
-				<div className="w-full h-full overflow-y-auto">
+				<div className="w-full overflow-y-auto">
 					<table className="w-full text-left border-collapse">
 						<thead className="bg-gray-200 sticky top-0">
 							<tr>
