@@ -35,7 +35,6 @@ const UserTable = () => {
 		useState<Appointment | null>(null);
 	const tableRef = useRef<HTMLTableElement>(null);
 
-	// Function to fetch professionals from Supabase
 	const fetchProfessionals = async () => {
 		try {
 			const { data, error } = await supabase.from("doctors").select("*");
@@ -53,16 +52,13 @@ const UserTable = () => {
 		setIsFileUploadModalOpen(true);
 	};
 
-	// Fetch professionals on component mount
 	useEffect(() => {
 		fetchProfessionals();
 	}, []);
 
-	// Fetch professionals on component mount
 	useEffect(() => {
 		fetchAllPatientAppointments();
 	}, [tableDate]);
-	// Fetch appointments for the selected professional and date to get booked times
 	const fetchDoctorAppointments = async () => {
 		try {
 			const { data, error } = await supabase
@@ -82,7 +78,6 @@ const UserTable = () => {
 		}
 	};
 
-	// Fetch appointments for the selected patient
 	const fetchPatientAppointments = async () => {
 		try {
 			let query = supabase
@@ -101,7 +96,6 @@ const UserTable = () => {
 				);
 
 			if (patientId) {
-				// Retrieve the patient_id associated with the provided patient_dni
 				const { data: patientData, error: patientError } =
 					await supabase
 						.from("patients")
@@ -140,7 +134,6 @@ const UserTable = () => {
 		}
 	};
 
-	// Fetch appointments for the selected patient
 	const fetchAllPatientAppointments = async () => {
 		try {
 			let query = supabase
@@ -173,7 +166,6 @@ const UserTable = () => {
 		}
 	};
 
-	// Update available times based on booked times
 	const updateAvailableTimes = (bookedTimes: string | any[]) => {
 		const allTimes = generateTimeOptions();
 		const filteredTimes = allTimes.filter(
@@ -182,7 +174,6 @@ const UserTable = () => {
 		setAvailableTimes(filteredTimes);
 	};
 
-	// Fetch appointments when professional or date changes
 	useEffect(() => {
 		if (professional && date) {
 			fetchDoctorAppointments();
@@ -222,7 +213,6 @@ const UserTable = () => {
 
 	const saveAppointment = async () => {
 		try {
-			// Retrieve the patient_id associated with the provided patient_dni
 			const { data: patientData, error: patientError } = await supabase
 				.from("patients")
 				.select("patient_id")
@@ -233,7 +223,6 @@ const UserTable = () => {
 				throw patientError;
 			}
 
-			// Use the retrieved patient_id when inserting the appointment
 			const { data, error } = await supabase.from("appointments").insert([
 				{
 					appointment_patient_id: patientData.patient_id,
@@ -268,11 +257,9 @@ const UserTable = () => {
 	}) => {
 		setProfessional(e.target.value);
 	};
-	// Function to handle date change
 	const handleDateChange = (date: React.SetStateAction<Date>) => {
 		setDate(date);
 	};
-	// Function to handle time change
 	const handleTimeChange = (e: {
 		target: { value: React.SetStateAction<string> };
 	}) => {
@@ -325,7 +312,6 @@ const UserTable = () => {
                             ${printContent.innerHTML}
                         </table>
                         <script>
-                            // Automatically close the window after printing
                             window.onload = function() {
                                 window.print();
                                 window.close();

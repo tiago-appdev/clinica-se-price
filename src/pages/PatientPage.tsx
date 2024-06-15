@@ -9,14 +9,13 @@ import { supabase } from "../../supabase";
 import { useAuth } from "../context/AuthContext";
 
 function PatientPage() {
-	const { isAuthenticated, userId } = useAuth(); // Desestructurar isAuthenticated, login y logout
+	const { isAuthenticated, userId } = useAuth();
 	const [appointments, setAppointments] = useState<Appointment[]>([]);
 	const [patientInfo, setPatientInfo] = useState<any>(null);
     const [medicalResults, setMedicalResults] = useState<any[]>([]);
 
 	const fetchPatientInfo = async (userId) => {
 		try {
-			// Fetch user data from supabase
 			const { data: patientData, error: patientError } = await supabase
 				.from("patients")
 				.select("*")
@@ -99,13 +98,11 @@ function PatientPage() {
 				await fetchAppointments(patientId);
 				await fetchMedicalResults(patientId);
 			} catch (error) {
-				// Handle error or set appropriate state for error display
 			}
 		};
 
 		fetchData();
-	}, [isAuthenticated, userId]); // Fetch data when 'user' changes
-
+	}, [isAuthenticated, userId]);
 	return (
 		<div className="flex flex-col min-h-screen">
 			<NavBar message="Cerrar sesión"></NavBar>

@@ -1,21 +1,20 @@
 /* eslint-disable react/prop-types */
-// src/context/AuthContext.jsx
 import { createContext, useContext, useState } from 'react';
 
 const AuthContext = createContext();
 
 export const AuthProvider = ({ children }) => {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
-  const [userId, setUserId] = useState(null); // State to store user_id
+  const [userId, setUserId] = useState(null); 
 
   const login = (userId) => {
     setIsAuthenticated(true);
-    setUserId(userId); // Store user_id when logging in
+    setUserId(userId); 
   };
 
   const logout = () => {
     setIsAuthenticated(false);
-    setUserId(null); // Clear user_id on logout
+    setUserId(null); 
   };
 
   return (
@@ -25,4 +24,5 @@ export const AuthProvider = ({ children }) => {
   );
 };
 
+// eslint-disable-next-line react-refresh/only-export-components
 export const useAuth = () => useContext(AuthContext);

@@ -1,14 +1,5 @@
 import React, { useEffect, useState } from "react";
 import { supabase } from "../../supabase";
-import {
-	Dialog,
-	DialogContent,
-	DialogHeader,
-	DialogFooter,
-} from "../components/Dialog";
-import Input from "../components/Input";
-import Label from "../components/Label";
-import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
 import AdminLoginModal from "../components/ModalLoginAdmin";
 import {
@@ -21,6 +12,7 @@ import { generateTimeOptions } from "../utils/util";
 import Footer from "../components/Footer";
 import ModalPatients from "../components/ModalPatients";
 import Appointment from "../types/appointment";
+import AppointmentModal from "../components/AppointmentModal";
 
 export default function Home() {
 	const [isModalOpen, setIsModalOpen] = useState(false);
@@ -39,7 +31,6 @@ export default function Home() {
 
 	const [appointments, setAppointments] = useState<Appointment[]>([]);
 
-	// Function to fetch professionals from Supabase
 	const fetchProfessionals = async () => {
 		try {
 			const { data, error } = await supabase.from("doctors").select("*");
@@ -52,12 +43,10 @@ export default function Home() {
 		}
 	};
 
-	// Fetch professionals on component mount
 	useEffect(() => {
 		fetchProfessionals();
 	}, []);
 
-	// Fetch appointments for the selected professional and date to get booked times
 	const fetchDoctorAppointments = async () => {
 		try {
 			const { data, error } = await supabase
@@ -76,10 +65,8 @@ export default function Home() {
 			console.error("Error fetching appointments:", error.message);
 		}
 	};
-	// Fetch appointments for the selected patient
 	const fetchPatientAppointments = async () => {
 		try {
-			// Retrieve the patient_id associated with the provided patient_dni
 			const { data: patientData, error: patientError } = await supabase
 				.from("patients")
 				.select("patient_id")
@@ -129,7 +116,6 @@ export default function Home() {
 		}
 	};
 
-	// Update available times based on booked times
 	const updateAvailableTimes = (bookedTimes: string | any[]) => {
 		const allTimes = generateTimeOptions();
 		const filteredTimes = allTimes.filter(
@@ -138,7 +124,6 @@ export default function Home() {
 		setAvailableTimes(filteredTimes);
 	};
 
-	// Fetch appointments when professional or date changes
 	useEffect(() => {
 		if (professional && date) {
 			fetchDoctorAppointments();
@@ -149,7 +134,6 @@ export default function Home() {
 		handlePatientIdBlur();
 	}, [professional]);
 
-	// Function to handle ID input blur event
 	const handlePatientIdBlur = async () => {
 		if (patientId) {
 			await fetchPatientAppointments();
@@ -177,7 +161,6 @@ export default function Home() {
 
 	const saveAppointment = async () => {
 		try {
-			// Retrieve the patient_id associated with the provided patient_dni
 			const { data: patientData, error: patientError } = await supabase
 				.from("patients")
 				.select("patient_id")
@@ -188,7 +171,6 @@ export default function Home() {
 				throw patientError;
 			}
 
-			// Use the retrieved patient_id when inserting the appointment
 			const { data, error } = await supabase.from("appointments").insert([
 				{
 					appointment_patient_id: patientData.patient_id,
@@ -213,21 +195,15 @@ export default function Home() {
 		setProfessional(e.target.value);
 	};
 
-	// Function to handle date change
 	const handleDateChange = (date: React.SetStateAction<Date>) => {
 		setDate(date);
 	};
 
-	// Function to handle time change
 	const handleTimeChange = (e: {
 		target: { value: React.SetStateAction<string> };
 	}) => {
 		setTime(e.target.value);
 	};
-
-	// const toggleEditModal = () => {
-	//   setIsEditModalOpen(!isEditModalOpen);
-	// };
 
 	return (
 		<div className="flex flex-col min-h-[100dvh]">
@@ -329,216 +305,27 @@ export default function Home() {
 						</div>
 					</div>
 				</section>
-				{/* Modal */}
-				<Dialog open={isModalOpen} onOpenChange={handleModalClose}>
-					<DialogContent className="sm:max-w-[500px] sm:min-h-[495px] sm:max-h-[500px]">
-						<DialogHeader>
-							{/* Tab Navigation */}
-							<button
-								className={`p-4 ${
-									activeTab === "reservar"
-										? "border-b-2 border-gray-900 font-semibold"
-										: ""
-								}`}
-								onClick={() => setActiveTab("reservar")}
-							>
-								Reservar Turno
-							</button>
-							<button
-								className={`p-4 ${
-									activeTab === "mis-turnos"
-										? "border-b-2 border-gray-900 font-semibold"
-										: ""
-								}`}
-								onClick={() => setActiveTab("mis-turnos")}
-							>
-								Mis Turnos
-							</button>
-						</DialogHeader>
-						{activeTab === "reservar" ? (
-							<form
-								onSubmit={handleSubmit}
-								className="grid gap-4 py-4"
-							>
-								<div className="grid items-center grid-cols-4 gap-4">
-									<Label
-										htmlFor="patientId"
-										className="text-right"
-									>
-										DNI
-									</Label>
-									<Input
-										id="patientId"
-										value={patientId}
-										onChange={(e) =>
-											setPatientId(e.target.value)
-										}
-										onBlur={handlePatientIdBlur}
-										type="text"
-										placeholder="Ingrese su DNI. Sin puntos."
-										required
-										className="col-span-3"
-									/>
-								</div>
-								<div className="grid items-center grid-cols-4 gap-4">
-									<Label
-										htmlFor="appointmentType"
-										className="text-right"
-									>
-										Tipo de Turno
-									</Label>
-									<select
-										id="appointmentType"
-										value={appointmentType}
-										onChange={(e) =>
-											setAppointmentType(e.target.value)
-										}
-										required
-										className="col-span-3 block w-full px-3 py-2 border rounded-md text-sm text-gray-700 focus:ring-1 focus:ring-primary focus:border-primary"
-									>
-										<option value="Atención Medica">
-											Atención Medica
-										</option>
-										<option value="Análisis Clínicos">
-											Análisis Clínicos
-										</option>
-									</select>
-								</div>
-								<div className="grid items-center grid-cols-4 gap-4">
-									<Label
-										htmlFor="professional"
-										className="text-right"
-									>
-										Profesional
-									</Label>
-									<select
-										id="professional"
-										value={professional}
-										onChange={handleProfessionalChange}
-										required
-										className="col-span-3 block w-full px-3 py-2 border rounded-md text-sm text-gray-700 focus:ring-1 focus:ring-primary focus:border-primary"
-									>
-										<option value="">
-											Seleccione un profesional
-										</option>
-										{professionals.map((prof) => (
-											<option
-												key={prof.doctor_id}
-												value={prof.doctor_id}
-											>
-												{prof.doctor_first_name}
-											</option>
-										))}
-									</select>
-								</div>
-								<div className="grid items-center grid-cols-4 gap-4">
-									<Label
-										htmlFor="date"
-										className="text-right"
-									>
-										Fecha
-									</Label>
-									<DatePicker
-										id="date"
-										selected={date}
-										onChange={handleDateChange}
-										dateFormat="dd/MM/yyyy"
-										minDate={new Date()}
-										required
-										className="col-span-3 px-3 py-2 border rounded-md text-sm text-gray-700 focus:ring-1 focus:ring-primary focus:border-primary"
-									/>
-								</div>
-								<div className="grid items-center grid-cols-4 gap-4">
-									<Label
-										htmlFor="time"
-										className="text-right"
-									>
-										Hora
-									</Label>
-									<div>
-										<select
-											id="time"
-											value={time}
-											onChange={handleTimeChange}
-											required
-											className="col-span-3 px-3 py-2 border rounded-md text-sm text-gray-700 focus:ring-1 focus:ring-primary focus:border-primary"
-										>
-											{availableTimes.map(
-												(timeOption) => (
-													<option
-														key={timeOption}
-														value={timeOption}
-													>
-														{timeOption}
-													</option>
-												)
-											)}
-										</select>
-									</div>
-								</div>
-								<DialogFooter>
-									<button
-										type="submit"
-										className="inline-flex h-10 items-center justify-center rounded-md bg-gray-900 px-8 text-sm font-medium text-white shadow transition-colors hover:bg-gray-800 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-gray-700 disabled:pointer-events-none disabled:opacity-50"
-									>
-										Confirmar Turno
-									</button>
-									<button
-										type="button"
-										className="inline-flex h-10 items-center justify-center rounded-md bg-red-700 px-8 text-sm font-medium text-white shadow transition-colors hover:bg-gray-800 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-gray-700 disabled:pointer-events-none disabled:opacity-50"
-										onClick={handleModalClose}
-									>
-										Cancelar
-									</button>
-								</DialogFooter>
-							</form>
-						) : (
-							<div className="overflow-auto sm:max-h-[20rem]">
-								<ul className="space-y-2">
-									{appointments.length > 0 ? (
-										appointments.map(
-											(appointment, index) => (
-												<li
-													key={index}
-													className="border p-2 rounded-md"
-												>
-													<p>
-														Fecha:{" "}
-														{new Date(
-															appointment.appointment_date +
-																"T12:00:00"
-														).toLocaleDateString()}
-													</p>
-													<p>
-														Hora:{" "}
-														{
-															appointment.appointment_time
-														}
-													</p>
-													<p>
-														Doctor:{" "}
-														{
-															appointment.doctors
-																.doctor_first_name
-														}{" "}
-														{
-															appointment.doctors
-																.doctor_last_name
-														}
-													</p>
-												</li>
-											)
-										)
-									) : (
-										<li className="border p-2 rounded-md">
-											<p>No hay turnos.</p>
-										</li>
-									)}
-								</ul>
-							</div>
-						)}
-					</DialogContent>
-				</Dialog>
+                <AppointmentModal
+						isModalOpen={isModalOpen}
+						handleModalClose={handleModalClose}
+						activeTab={activeTab}
+						setActiveTab={setActiveTab}
+						patientId={patientId}
+						setPatientId={setPatientId}
+						handlePatientIdBlur={handlePatientIdBlur}
+						appointmentType={appointmentType}
+						setAppointmentType={setAppointmentType}
+						professional={professional}
+						handleProfessionalChange={handleProfessionalChange}
+						professionals={professionals}
+						date={date}
+						handleDateChange={handleDateChange}
+						time={time}
+						handleTimeChange={handleTimeChange}
+						availableTimes={availableTimes}
+						handleSubmit={handleSubmit}
+						appointments={appointments}
+					/>
 			</main>
 			<Footer />
 		</div>
