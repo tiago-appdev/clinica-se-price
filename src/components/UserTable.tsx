@@ -1,5 +1,5 @@
 /* eslint-disable no-unused-vars */
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import AppointmentModal from "./AppointmentModal";
 import FileUploadingModal from "./FileUploadingModal";
 import { supabase } from "../../supabase";
@@ -9,6 +9,7 @@ import React from "react";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faArrowAltCircleRight } from "@fortawesome/free-solid-svg-icons";
 import { faArrowAltCircleLeft } from "@fortawesome/free-solid-svg-icons";
+
 
 const UserTable = () => {
 	const [isEditModalOpen, setIsEditModalOpen] = useState(false);
@@ -32,6 +33,7 @@ const UserTable = () => {
 	const [isFileUploadModalOpen, setIsFileUploadModalOpen] = useState(false);
 	const [selectedAppointment, setSelectedAppointment] =
 		useState<Appointment | null>(null);
+	const tableRef = useRef<HTMLTableElement>(null);
 
 	// Function to fetch professionals from Supabase
 	const fetchProfessionals = async () => {
@@ -201,10 +203,6 @@ const UserTable = () => {
 		}
 	};
 
-	const handleModalOpen = () => {
-		setIsModalOpen(true);
-	};
-
 	const handleModalClose = () => {
 		setIsModalOpen(false);
 		setPatientId("");
@@ -259,7 +257,7 @@ const UserTable = () => {
 		nextDay.setDate(tableDate.getDate() + 1);
 		setTableDate(nextDay);
 	};
-    const handlePreviousDay = () => {
+	const handlePreviousDay = () => {
 		const nextDay = new Date(tableDate);
 		nextDay.setDate(tableDate.getDate() - 1);
 		setTableDate(nextDay);
@@ -285,6 +283,65 @@ const UserTable = () => {
 		setIsEditModalOpen(!isEditModalOpen);
 	};
 
+    const handlePrint = () => {
+        const printContent = document.getElementById("table");
+
+        if (!printContent) {
+            console.error("Table content not found");
+            return;
+        }
+
+        const newWindow = window.open("", "_blank");
+        if (newWindow) {
+            newWindow.document.write(`
+                <html>
+                    <head>
+                        <title>Print Table</title>
+                        <style>
+                            /* Optional: Add any styling specific for printing */
+                            body {
+                                font-family: Arial, sans-serif;
+                            }
+                            table {
+                                width: 100%;
+                                border-collapse: collapse;
+                                margin-bottom: 1rem;
+                            }
+                            th, td {
+                                border: 1px solid #ddd;
+                                padding: 8px;
+                                text-align: left;
+                            }
+                            th {
+                                background-color: #f2f2f2;
+                            }
+                            td {
+                                vertical-align: top;
+                            }
+                        </style>
+                    </head>
+                    <body>
+                        <table>
+                            ${printContent.innerHTML}
+                        </table>
+                        <script>
+                            // Automatically close the window after printing
+                            window.onload = function() {
+                                window.print();
+                                window.close();
+                            }
+                        </script>
+                    </body>
+                </html>
+            `);
+        } else {
+            console.error("Failed to open print window");
+        }
+        newWindow?.stop()
+        newWindow?.print()
+        newWindow?.close()
+    };
+
 	return (
 		<div className="flex flex-col items-center">
 			<div className="flex flex-col items-center w-11/12 mt-2">
@@ -299,9 +356,7 @@ const UserTable = () => {
 							className="mr-2"
 						/>
 					</button>
-					<button
-						className="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded"
-					>
+					<button className="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded">
 						{formatDate(tableDate)}
 					</button>
 					<button
@@ -336,65 +391,74 @@ const UserTable = () => {
 						appointments={appointments}
 					/>
 					<div className="space-x-2">
-						<button className="bg-blue-500 hover:bg-blue-600 text-white px-3 py-1 rounded"
-                        onClick={() => {
-                            setTableDate(new Date());
-                        }}
-                        >
+						<button
+							className="bg-blue-500 hover:bg-blue-600 text-white px-3 py-1 rounded"
+							onClick={() => {
+								setTableDate(new Date());
+							}}
+						>
 							Hoy
 						</button>
-						<button className="bg-blue-500 hover:bg-blue-600 text-white px-3 py-1 rounded"
-                        onClick={() => {
-                            const nextDay = new Date();
-                            nextDay.setDate(tableDate.getDate() + 7);
-                            setTableDate(nextDay);
-                        }}
-                        >
+						<button
+							className="bg-blue-500 hover:bg-blue-600 text-white px-3 py-1 rounded"
+							onClick={() => {
+								const nextDay = new Date();
+								nextDay.setDate(tableDate.getDate() + 7);
+								setTableDate(nextDay);
+							}}
+						>
 							+7
 						</button>
-						<button className="bg-blue-500 hover:bg-blue-600 text-white px-3 py-1 rounded"
-                        onClick={() => {
-                            const nextDay = new Date();
-                            nextDay.setDate(tableDate.getDate() + 14);
-                            setTableDate(nextDay);
-                        }}
-                        >
+						<button
+							className="bg-blue-500 hover:bg-blue-600 text-white px-3 py-1 rounded"
+							onClick={() => {
+								const nextDay = new Date();
+								nextDay.setDate(tableDate.getDate() + 14);
+								setTableDate(nextDay);
+							}}
+						>
 							+14
 						</button>
-						<button className="bg-blue-500 hover:bg-blue-600 text-white px-3 py-1 rounded"
-                        onClick={() => {
-                            const nextDay = new Date();
-                            nextDay.setDate(tableDate.getDate() + 21);
-                            setTableDate(nextDay);
-                        }}
-                        >
+						<button
+							className="bg-blue-500 hover:bg-blue-600 text-white px-3 py-1 rounded"
+							onClick={() => {
+								const nextDay = new Date();
+								nextDay.setDate(tableDate.getDate() + 21);
+								setTableDate(nextDay);
+							}}
+						>
 							+21
 						</button>
-						<button className="bg-blue-500 hover:bg-blue-600 text-white px-3 py-1 rounded"
-                        onClick={() => {
-                            const nextDay = new Date();
-                            nextDay.setDate(tableDate.getDate() + 28);
-                            setTableDate(nextDay);
-                        }}
-                        >
+						<button
+							className="bg-blue-500 hover:bg-blue-600 text-white px-3 py-1 rounded"
+							onClick={() => {
+								const nextDay = new Date();
+								nextDay.setDate(tableDate.getDate() + 28);
+								setTableDate(nextDay);
+							}}
+						>
 							+28
 						</button>
 					</div>
 				</div>
 				<div className="flex justify-between items-center w-full mb-4">
 					<div className="space-x-4">
-						<button className="text-gray-700 bg-white border px-4 py-2 rounded"
-                        onClick={() => setIsModalOpen(true)}
-                        >
+						<button
+							className="text-gray-700 bg-white border px-4 py-2 rounded"
+							onClick={() => setIsModalOpen(true)}
+						>
 							Agendar Turno
 						</button>
 					</div>
-					<button className="text-gray-700 bg-white border border-gray-300 px-4 py-2 rounded">
+					<button
+						className="text-gray-700 bg-white border border-gray-300 px-4 py-2 rounded"
+						onClick={handlePrint}
+					>
 						Imprimir Horario
 					</button>
 				</div>
 				<div className="w-full overflow-y-auto">
-					<table className="w-full text-left border-collapse">
+					<table id="table" className="w-full text-left border-collapse">
 						<thead className="bg-gray-200 sticky top-0">
 							<tr>
 								<th className="px-4 py-2">Hora</th>
