@@ -15,9 +15,7 @@ function PatientPage() {
 	useEffect(() => {
 		const fetchPatientInfo = async () => {
 			try {
-                console.log("isAuthenticated", userId);
 				if (!isAuthenticated || !userId) return;
-
 
 				// Fetch user data from supabase
 				const { data: patientData, error: patientError } =
@@ -25,7 +23,7 @@ function PatientPage() {
 						.from("patients")
 						.select("*")
 						.eq("patient_user_id", userId)
-						.single(); 
+						.single();
 
 				if (!patientData || !patientData.patient_id) {
 					throw new Error("Patient not found");
@@ -43,14 +41,12 @@ function PatientPage() {
 						`appointment_time, 
              appointment_date, 
              appointment_doctor_id, 
-             appointment_type, 
+             appointment_type,
+             appointment_status,
              doctors:appointment_doctor_id (doctor_first_name, doctor_last_name)`
 					)
 					.eq("appointment_patient_id", patientData.patient_id)
-					.gte(
-						"appointment_date",
-						new Date().toISOString().split("T")[0]
-					);
+
 
 				const { data, error } = await query
 					.returns<Appointment[]>()
@@ -61,6 +57,7 @@ function PatientPage() {
 				if (error) {
 					throw error;
 				}
+				console.log(data);
 				setAppointments(data);
 			} catch (error) {
 				console.error("Error fetching patient data:", error.message);
@@ -151,7 +148,7 @@ function PatientPage() {
 								</CardHeader>
 								<CardContent>
 									<div className="grid gap-4">
-										{appointments.map(
+										{appointments.length > 0? (appointments.map(
 											(appointment, index) => (
 												<div
 													key={index}
@@ -193,7 +190,10 @@ function PatientPage() {
 														appointments.length -
 															1 && <Separator />}
 												</div>
-											)
+											))) : (
+                                                <div className="text-gray-500 dark:text-gray-400 text-center">
+                                                    No appointments found
+                                                </div>
 										)}
 									</div>
 								</CardContent>
@@ -207,7 +207,7 @@ function PatientPage() {
 										<div className="flex items-center justify-between">
 											<div>Name</div>
 											<div>
-												{patientInfo?.patient_name}
+												{patientInfo?.patient_first_name} {patientInfo?.patient_last_name}
 											</div>
 										</div>
 										<Separator />
@@ -228,7 +228,7 @@ function PatientPage() {
 										<div className="flex items-center justify-between">
 											<div>Date of Birth</div>
 											<div>
-												{patientInfo?.patient_dob}
+												{patientInfo?.patient_date_of_birth}
 											</div>
 										</div>
 									</div>
