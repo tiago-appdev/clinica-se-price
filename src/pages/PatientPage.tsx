@@ -6,6 +6,7 @@ import { Separator } from "../components/Separator";
 import Appointment from "../types/appointment";
 import { supabase } from "../../supabase";
 import { AuthContext } from "../context/AuthContext";
+import Cookies from "js-cookie";
 
 // Página del paciente
 function PatientPage() {
@@ -17,11 +18,14 @@ function PatientPage() {
 	// Función para obtener la información del paciente
 	const fetchPatientInfo = async (userId) => {
 		try {
+            userId = Cookies.get("userId") || userId;
 			const { data: patientData, error: patientError } = await supabase
 				.from("patients")
 				.select("*")
 				.eq("patient_user_id", userId)
 				.single();
+
+            
 
 			if (!patientData || !patientData.patient_id) {
 				throw new Error("Paciente no encontrado");
