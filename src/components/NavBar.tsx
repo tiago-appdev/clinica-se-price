@@ -1,11 +1,11 @@
-import React from 'react';
-import { useAuth } from '../context/AuthContext';
+import React, {useContext} from 'react';
+import { AuthContext } from '../context/AuthContext';
 import { CrossIcon } from '../icons/icons';
 import { useNavigate } from 'react-router-dom';
 
 const NavBar = ({ message }) => {
   const navigate = useNavigate();
-  const { logout } = useAuth();
+  const { logout } = useContext(AuthContext);
   return (
     <header className='bg-gray-900 text-white px-4 lg:px-6 h-12 flex items-center'>
       <button

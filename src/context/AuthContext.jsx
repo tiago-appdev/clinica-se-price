@@ -1,28 +1,43 @@
 /* eslint-disable react/prop-types */
-import { createContext, useContext, useState } from 'react';
+import { createContext, useState, useEffect } from "react";
+import Cookies from "js-cookie";
 
 const AuthContext = createContext();
 
-export const AuthProvider = ({ children }) => {
-  const [isAuthenticated, setIsAuthenticated] = useState(false);
-  const [userId, setUserId] = useState(null); 
+const AuthProvider = ({ children }) => {
+  const [isAuthenticated, setIsAuthenticated] = useState(() => {
+    // Initialize isAuthenticated based on token presence
+    const token = localStorage.getItem("token") || Cookies.get("token");
+    return !!token; // true if token exists, false otherwise
+  });
 
-  const login = (userId) => {
+  const login = (token) => {
+    localStorage.setItem("token", token);
+    Cookies.set("token", token, { expires: 7 });
     setIsAuthenticated(true);
-    setUserId(userId); 
   };
 
   const logout = () => {
+    localStorage.removeItem("token");
+    Cookies.remove("token");
     setIsAuthenticated(false);
-    setUserId(null); 
   };
 
+  useEffect(() => {
+    // Ensure isAuthenticated reflects token presence on mount
+    const token = localStorage.getItem("token") || Cookies.get("token");
+    if (token) {
+      setIsAuthenticated(true);
+    } else {
+      setIsAuthenticated(false); // Ensure it's false if token is not found
+    }
+  }, []);
+
   return (
-    <AuthContext.Provider value={{ isAuthenticated, userId, login, logout }}>
+    <AuthContext.Provider value={{ isAuthenticated, login, logout }}>
       {children}
     </AuthContext.Provider>
   );
 };
 
-// eslint-disable-next-line react-refresh/only-export-components
-export const useAuth = () => useContext(AuthContext);
+export { AuthProvider, AuthContext };
