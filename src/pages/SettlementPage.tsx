@@ -8,6 +8,7 @@ import {
 	CardFooter,
 } from "../components/Card";
 
+// Página de liquidación de honorarios
 export default function SettlementPage() {
 	const initialRows = [
 		{ id: 1, doctor: "Dr. Jane Smith", amount: "$5,000.00" },
@@ -19,7 +20,7 @@ export default function SettlementPage() {
 	const [rows, setRows] = useState(initialRows);
 
 	const handleLiquidar = (id) => {
-		setRows(rows.filter(row => row.id !== id));
+		setRows(rows.filter((row) => row.id !== id));
 	};
 
 	const handleLiquidarTodos = () => {
@@ -50,7 +51,7 @@ export default function SettlementPage() {
 									</tr>
 								</thead>
 								<tbody className="bg-white divide-y divide-gray-200">
-									{rows.map(row => (
+									{rows.map((row) => (
 										<tr key={row.id}>
 											<td className="px-6 py-4 whitespace-nowrap font-medium text-gray-900">
 												{row.doctor}
@@ -60,7 +61,9 @@ export default function SettlementPage() {
 											</td>
 											<td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
 												<button
-													onClick={() => handleLiquidar(row.id)}
+													onClick={() =>
+														handleLiquidar(row.id)
+													}
 													className="text-indigo-600 hover:text-indigo-900 border border-indigo-600 px-3 py-1 rounded"
 												>
 													Liquidar

@@ -5,6 +5,7 @@ import UserTable from "../components/UserTable";
 import Sidebar from "../components/Sidebar";
 import SettlementPage from "../pages/SettlementPage";
 
+// Pagina de administrador
 const AdminPage = () => {
 	const [currentPage, setCurrentPage] = useState("UserTable");
 

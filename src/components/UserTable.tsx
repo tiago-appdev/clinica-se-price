@@ -13,7 +13,6 @@ import { faArrowAltCircleLeft } from "@fortawesome/free-solid-svg-icons";
 const UserTable = () => {
 	const [isEditModalOpen, setIsEditModalOpen] = useState(false);
 
-	//Modal Turnos
 	const [isModalOpen, setIsModalOpen] = useState(false);
 	const [activeTab, setActiveTab] = useState("reservar");
 	const [patientId, setPatientId] = useState("");
@@ -32,7 +31,6 @@ const UserTable = () => {
 	const [isFileUploadModalOpen, setIsFileUploadModalOpen] = useState(false);
 	const [selectedAppointment, setSelectedAppointment] =
 		useState<Appointment | null>(null);
-	const tableRef = useRef<HTMLTableElement>(null);
 
 	const fetchProfessionals = async () => {
 		try {

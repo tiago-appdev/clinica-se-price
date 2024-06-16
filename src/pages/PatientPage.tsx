@@ -7,6 +7,7 @@ import Appointment from "../types/appointment";
 import { supabase } from "../../supabase";
 import { AuthContext } from "../context/AuthContext";
 
+// Página del paciente
 function PatientPage() {
 	const { isAuthenticated, userId } = useContext(AuthContext);
 	const [appointments, setAppointments] = useState<Appointment[]>([]);
@@ -99,9 +100,11 @@ function PatientPage() {
 		}
 	};
 
+	// Obtener los datos del paciente al cargar la página
 	useEffect(() => {
 		const fetchData = async () => {
 			try {
+				// Si el usuario no está autenticado o no tiene un ID, no hacer nada
 				if (!isAuthenticated || !userId) return;
 
 				const patientId = await fetchPatientInfo(userId);
@@ -149,6 +152,7 @@ function PatientPage() {
 									<CardTitle>Turnos</CardTitle>
 								</CardHeader>
 								<CardContent>
+									{/* Mostrar los turnos del paciente */}
 									<div className="grid gap-4">
 										{appointments.length > 0 ? (
 											appointments.map(
