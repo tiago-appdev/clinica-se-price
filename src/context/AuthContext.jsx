@@ -7,9 +7,9 @@ const AuthContext = createContext();
 const AuthProvider = ({ children }) => {
 	const [isAuthenticated, setIsAuthenticated] = useState(() => {
 		const userId = localStorage.getItem("userId") || Cookies.get("userId");
-		return !!userId; 
+		return !!userId;
 	});
-    const userId = localStorage.getItem("userId") || Cookies.get("userId");
+	const userId = localStorage.getItem("userId") || Cookies.get("userId");
 
 	const login = (userId) => {
 		localStorage.setItem("userId", userId);
@@ -28,12 +28,14 @@ const AuthProvider = ({ children }) => {
 		if (userId) {
 			setIsAuthenticated(true);
 		} else {
-			setIsAuthenticated(false); 
+			setIsAuthenticated(false);
 		}
 	}, []);
 
 	return (
-		<AuthContext.Provider value={{ isAuthenticated, userId, login, logout }}>
+		<AuthContext.Provider
+			value={{ isAuthenticated, userId, login, logout }}
+		>
 			{children}
 		</AuthContext.Provider>
 	);

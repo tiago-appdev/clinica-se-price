@@ -1,84 +1,86 @@
-import React, { useState } from 'react';
-import { supabase } from '../../supabase';
-import NavBar from '../components/NavBar';
-import Footer from '../components/Footer';
-import { useNavigate } from 'react-router-dom';
+import React, { useState } from "react";
+import { supabase } from "../../supabase";
+import NavBar from "../components/NavBar";
+import Footer from "../components/Footer";
+import { useNavigate } from "react-router-dom";
 
+// Página de registro de paciente
 const RegisterPage = () => {
-  const navigate = useNavigate();
-  const [formData, setFormData] = useState({
-    username: '',
-    password: '',
-    email: '',
-    dni: '',
-    role: 'patient',
-    patient_first_name: '',
-    patient_last_name: '',
-    patient_date_of_birth: '',
-    patient_phone: '',
-    patient_email: '',
-    patient_medical_history: '',
-  });
+	const navigate = useNavigate();
+	const [formData, setFormData] = useState({
+		username: "",
+		password: "",
+		email: "",
+		dni: "",
+		role: "patient",
+		patient_first_name: "",
+		patient_last_name: "",
+		patient_date_of_birth: "",
+		patient_phone: "",
+		patient_email: "",
+		patient_medical_history: "",
+	});
 
-  const handleChange = (e) => {
-    setFormData({
-      ...formData,
-      [e.target.name]: e.target.value,
-    });
-  };
+	const handleChange = (e) => {
+		setFormData({
+			...formData,
+			[e.target.name]: e.target.value,
+		});
+	};
 
-  const handleSubmit = async (e) => {
-    e.preventDefault();
+	const handleSubmit = async (e) => {
+		e.preventDefault();
 
-    try {
-      const { data: userData, error: userError } = await supabase
-        .from('users')
-        .insert([
-          {
-            username: formData.username,
-            password: formData.password,
-            email: formData.email,
-            role: formData.role,
-            created_at: new Date(),
-            updated_at: new Date(),
-          },
-        ])
-        .select();
+		try {
+			const { data: userData, error: userError } = await supabase
+				.from("users")
+				.insert([
+					{
+						username: formData.username,
+						password: formData.password,
+						email: formData.email,
+						role: formData.role,
+						created_at: new Date(),
+						updated_at: new Date(),
+					},
+				])
+				.select();
 
-      if (userError) throw userError;
-      if (!userData || userData.length === 0) {
-        throw new Error(
-          'No se pudieron recuperar los datos del usuario insertado.'
-        );
-      }
+			if (userError) throw userError;
+			if (!userData || userData.length === 0) {
+				throw new Error(
+					"No se pudieron recuperar los datos del usuario insertado."
+				);
+			}
 
-      const user_id = userData[0].user_id;
+			const user_id = userData[0].user_id;
 
-      const { error: patientError } = await supabase
-        .from('patients')
-        .insert([
-          {
-            patient_first_name: formData.patient_first_name,
-            patient_last_name: formData.patient_last_name,
-            patient_date_of_birth: formData.patient_date_of_birth,
-            patient_phone: formData.patient_phone,
-            patient_email: formData.email,
-            patient_medical_history: formData.patient_medical_history,
-            patient_dni: formData.dni,
-            patient_user_id: user_id,
-            patient_created_at: new Date(),
-            patient_updated_at: new Date(),
-          },
-        ]);
-      if (patientError) throw patientError;
+			const { error: patientError } = await supabase
+				.from("patients")
+				.insert([
+					{
+						patient_first_name: formData.patient_first_name,
+						patient_last_name: formData.patient_last_name,
+						patient_date_of_birth: formData.patient_date_of_birth,
+						patient_phone: formData.patient_phone,
+						patient_email: formData.email,
+						patient_medical_history:
+							formData.patient_medical_history,
+						patient_dni: formData.dni,
+						patient_user_id: user_id,
+						patient_created_at: new Date(),
+						patient_updated_at: new Date(),
+					},
+				]);
+			if (patientError) throw patientError;
 
-      alert('Paciente registrado exitosamente!');
-      navigate('/');
-    } catch (error) {
-      console.error('Error registrando el paciente:', error);
-      alert('Error registrando el paciente');
-    }
-  };
+			alert("Paciente registrado exitosamente!");
+			navigate("/");
+		} catch (error) {
+			console.error("Error registrando el paciente:", error);
+			alert("Error registrando el paciente");
+		}
+	};
 
   return (
     <div className='flex flex-col min-h-screen'>
