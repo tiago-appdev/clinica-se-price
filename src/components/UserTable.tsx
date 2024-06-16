@@ -10,7 +10,6 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faArrowAltCircleRight } from "@fortawesome/free-solid-svg-icons";
 import { faArrowAltCircleLeft } from "@fortawesome/free-solid-svg-icons";
 
-
 const UserTable = () => {
 	const [isEditModalOpen, setIsEditModalOpen] = useState(false);
 
@@ -268,17 +267,17 @@ const UserTable = () => {
 		setIsEditModalOpen(!isEditModalOpen);
 	};
 
-    const handlePrint = () => {
-        const printContent = document.getElementById("table");
+	const handlePrint = () => {
+		const printContent = document.getElementById("table");
 
-        if (!printContent) {
-            console.error("Table content not found");
-            return;
-        }
+		if (!printContent) {
+			console.error("Table content not found");
+			return;
+		}
 
-        const newWindow = window.open("", "_blank");
-        if (newWindow) {
-            newWindow.document.write(`
+		const newWindow = window.open("", "_blank");
+		if (newWindow) {
+			newWindow.document.write(`
                 <html>
                     <head>
                         <title>Print Table</title>
@@ -318,13 +317,13 @@ const UserTable = () => {
                     </body>
                 </html>
             `);
-        } else {
-            console.error("Failed to open print window");
-        }
-        newWindow?.stop()
-        newWindow?.print()
-        newWindow?.close()
-    };
+		} else {
+			console.error("Failed to open print window");
+		}
+		newWindow?.stop();
+		newWindow?.print();
+		newWindow?.close();
+	};
 
 	return (
 		<div className="flex flex-col items-center">
@@ -442,7 +441,10 @@ const UserTable = () => {
 					</button>
 				</div>
 				<div className="w-full overflow-y-auto">
-					<table id="table" className="w-full text-left border-collapse">
+					<table
+						id="table"
+						className="w-full text-left border-collapse"
+					>
 						<thead className="bg-gray-200 sticky top-0">
 							<tr>
 								<th className="px-4 py-2">Hora</th>

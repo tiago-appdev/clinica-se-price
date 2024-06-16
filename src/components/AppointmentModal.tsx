@@ -4,7 +4,9 @@ import Label from './Label';
 import DatePicker from 'react-datepicker';
 import Input from './Input';
 import 'react-datepicker/dist/react-datepicker.css';
+import React from 'react';
 
+// Modal para reservar turnos
 const AppointmentModal = ({
   isModalOpen,
   handleModalClose,
@@ -33,7 +35,6 @@ const AppointmentModal = ({
     >
       <DialogContent className='sm:max-w-[500px] sm:min-h-[495px] sm:max-h-[500px]'>
         <DialogHeader>
-          {/* Tab Navigation */}
           <button
             className={`p-4 ${
               activeTab === 'reservar'

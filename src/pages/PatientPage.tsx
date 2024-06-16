@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useContext } from "react";
 import NavBar from "../components/NavBar";
-import { Footer, Input } from "../components";
+import { Footer, Input } from "../components/Index";
 import { Card, CardContent, CardHeader, CardTitle } from "../components/Card";
 import { Separator } from "../components/Separator";
 import Appointment from "../types/appointment";
@@ -8,7 +8,7 @@ import { supabase } from "../../supabase";
 import { AuthContext } from "../context/AuthContext";
 
 function PatientPage() {
-	const { isAuthenticated, userId } = useContext( AuthContext);
+	const { isAuthenticated, userId } = useContext(AuthContext);
 	const [appointments, setAppointments] = useState<Appointment[]>([]);
 	const [patientInfo, setPatientInfo] = useState<any>(null);
 	const [medicalResults, setMedicalResults] = useState<any[]>([]);
@@ -107,8 +107,7 @@ function PatientPage() {
 				const patientId = await fetchPatientInfo(userId);
 				await fetchAppointments(patientId);
 				await fetchMedicalResults(patientId);
-			} catch (error) {
-			}
+			} catch (error) {}
 		};
 
 		fetchData();
