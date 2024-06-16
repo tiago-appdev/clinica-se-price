@@ -1,14 +1,14 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useContext } from "react";
 import NavBar from "../components/NavBar";
 import { Footer, Input } from "../components";
 import { Card, CardContent, CardHeader, CardTitle } from "../components/Card";
 import { Separator } from "../components/Separator";
 import Appointment from "../types/appointment";
 import { supabase } from "../../supabase";
-import { useAuth } from "../context/AuthContext";
+import { AuthContext } from "../context/AuthContext";
 
 function PatientPage() {
-	const { isAuthenticated, userId } = useAuth();
+	const { isAuthenticated, userId } = useContext( AuthContext);
 	const [appointments, setAppointments] = useState<Appointment[]>([]);
 	const [patientInfo, setPatientInfo] = useState<any>(null);
 	const [medicalResults, setMedicalResults] = useState<any[]>([]);
@@ -16,7 +16,6 @@ function PatientPage() {
 	// Función para obtener la información del paciente
 	const fetchPatientInfo = async (userId) => {
 		try {
-            console.log(userId)
 			const { data: patientData, error: patientError } = await supabase
 				.from("patients")
 				.select("*")
