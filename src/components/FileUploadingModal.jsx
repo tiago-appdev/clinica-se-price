@@ -47,7 +47,6 @@ export default function FileUploadingModal({
 				throw uploadError;
 			}
 
-
 			const { data: publicUrlData } = supabase.storage
 				.from("seprice-reports")
 				.getPublicUrl(fileData.path);
@@ -61,9 +60,9 @@ export default function FileUploadingModal({
 			const fileResultData = {
 				appointment_id: appointmentId,
 				patient_id: patientId,
-				result_type: fileData.fullPath.split(".").pop(), 
-				result_text: "", 
-				result_file_url: publicUrl, 
+				result_type: fileData.fullPath.split(".").pop(),
+				result_text: "",
+				result_file_url: publicUrl,
 				result_created_at: new Date(),
 				result_updated_at: new Date(),
 			};
@@ -72,8 +71,8 @@ export default function FileUploadingModal({
 				appointment_id: appointmentId,
 				patient_id: patientId,
 				result_type: "text",
-				result_text: medicalHistory, 
-				result_file_url: "", 
+				result_text: medicalHistory,
+				result_file_url: "",
 				result_created_at: new Date(),
 				result_updated_at: new Date(),
 			};

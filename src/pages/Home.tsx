@@ -61,9 +61,11 @@ export default function Home() {
 			if (error) {
 				throw error;
 			}
+			// Dependiendo del doctor seleccionado, buscamos las horas disponibles
 			const bookedTimes = data.map(
 				(appointment) => appointment.appointment_time
 			);
+			// Actualizamos las horas disponibles
 			updateAvailableTimes(bookedTimes);
 		} catch (error) {
 			console.error("Error fetching appointments:", error.message);
@@ -103,6 +105,7 @@ export default function Home() {
 					new Date().toISOString().split("T")[0]
 				);
 
+			// Si se seleccionó un profesional, filtramos las citas por ese profesional
 			if (professional) {
 				query = query.eq("appointment_doctor_id", professional);
 			}
@@ -143,7 +146,7 @@ export default function Home() {
 		handlePatientIdBlur();
 	}, [professional]);
 
-	// Función para manejar el evento onBlur del campo de ID de paciente
+	// Cuando dejamos el input de DNI del paciente, buscamos los turnos del paciente
 	const handlePatientIdBlur = async () => {
 		if (patientId) {
 			await fetchPatientAppointments();
@@ -325,27 +328,27 @@ export default function Home() {
 						</div>
 					</div>
 				</section>
-                <AppointmentModal
-						isModalOpen={isModalOpen}
-						handleModalClose={handleModalClose}
-						activeTab={activeTab}
-						setActiveTab={setActiveTab}
-						patientId={patientId}
-						setPatientId={setPatientId}
-						handlePatientIdBlur={handlePatientIdBlur}
-						appointmentType={appointmentType}
-						setAppointmentType={setAppointmentType}
-						professional={professional}
-						handleProfessionalChange={handleProfessionalChange}
-						professionals={professionals}
-						date={date}
-						handleDateChange={handleDateChange}
-						time={time}
-						handleTimeChange={handleTimeChange}
-						availableTimes={availableTimes}
-						handleSubmit={handleSubmit}
-						appointments={appointments}
-					/>
+				<AppointmentModal
+					isModalOpen={isModalOpen}
+					handleModalClose={handleModalClose}
+					activeTab={activeTab}
+					setActiveTab={setActiveTab}
+					patientId={patientId}
+					setPatientId={setPatientId}
+					handlePatientIdBlur={handlePatientIdBlur}
+					appointmentType={appointmentType}
+					setAppointmentType={setAppointmentType}
+					professional={professional}
+					handleProfessionalChange={handleProfessionalChange}
+					professionals={professionals}
+					date={date}
+					handleDateChange={handleDateChange}
+					time={time}
+					handleTimeChange={handleTimeChange}
+					availableTimes={availableTimes}
+					handleSubmit={handleSubmit}
+					appointments={appointments}
+				/>
 			</main>
 			<Footer />
 		</div>
