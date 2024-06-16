@@ -1,5 +1,6 @@
 import React from 'react';
 
+// Componente Input para mantener consistencia en los inputs de la aplicación
 const Input = ({ className, ...props }) => {
   return (
     <input
