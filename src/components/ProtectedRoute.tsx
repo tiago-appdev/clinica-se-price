@@ -3,6 +3,7 @@ import React, { useContext } from 'react';
 import { AuthContext } from '../context/AuthContext';
 
 // eslint-disable-next-line react/prop-types
+// Este elemento recibe un children que es el componente que se va a renderizar si el usuario está autenticado.
 const ProtectedRoute = ({ children }) => {
   const { isAuthenticated } = useContext(AuthContext);
 
